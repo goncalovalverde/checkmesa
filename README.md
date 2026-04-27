@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CheckMesa
 
-## Getting Started
+Aplicação web de gestão de sala para staff de restauração. Optimizada para uso em tablet e telemóvel durante o serviço.
 
-First, run the development server:
+## Funcionalidades
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| Área | Descrição |
+|---|---|
+| **Backoffice (`/admin`)** | Gestão de utilizadores, mesas e catálogo de produtos com cálculo automático de IVA |
+| **Frontoffice (`/sala`)** | Mapa de mesas, lançamento de pedidos, consulta e divisão de conta |
+
+## Stack Tecnológica
+
+| Tecnologia | Versão | Papel |
+|---|---|---|
+| Next.js | 14+ (App Router) | Framework fullstack |
+| TypeScript | 5+ | Linguagem |
+| Prisma | 5+ | ORM |
+| SQLite | — | Base de dados local |
+| NextAuth.js | 4+ | Autenticação |
+| Tailwind CSS | 3+ | Estilos (mobile-first) |
+| bcryptjs | — | Hash de passwords |
+
+> Decisão documentada em [ADR-0001](docs/adr/0001-stack-selection.md).
+
+## Regras de Negócio
+
+### IVA (Portugal)
+- **Prato** → `basePrice = finalPrice / 1.13` · vatRate = 13%
+- **Bebida** → `basePrice = finalPrice / 1.23` · vatRate = 23%
+- A base de dados guarda: `finalPrice`, `basePrice`, `vatAmount`, `vatRate`
+
+### Divisão de Conta
+- **Por Pessoas** → `total / N` (default)
+- **Por Consumo** → seleção manual de itens inteiros por pessoa
+
+## Modelo de Dados
+
+```
+User            Table           Product
+─────────────   ─────────────   ──────────────────────
+id              id              id
+name            name            name
+email           capacity        category
+passwordHash    status          type (DRINK|DISH)
+role            └ FREE          finalPrice
+└ ADMIN         └ OCCUPIED      basePrice
+└ STAFF                         vatAmount
+                                vatRate
+                                active
+
+TableSession    OrderItem
+─────────────   ─────────────
+id              id
+tableId ──────► sessionId ──►
+openedBy        productId ──►
+consumers       quantity
+status          unitPrice (snapshot)
+└ OPEN          addedAt
+└ CLOSED
+openedAt
+closedAt
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Estrutura de Ficheiros
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+checkmesa/
+├── prisma/
+│   ├── schema.prisma
+│   ├── seed.ts
+│   └── migrations/
+├── src/
+│   └── app/
+│       ├── (auth)/login/
+│       ├── admin/
+│       │   ├── users/
+│       │   ├── tables/
+│       │   └── products/
+│       ├── sala/
+│       │   ├── page.tsx              # Mapa de mesas
+│       │   └── [tableId]/
+│       │       ├── page.tsx          # Pedidos
+│       │       └── consulta/page.tsx # Fatura + divisão
+│       └── api/
+│           ├── auth/[...nextauth]/
+│           ├── users/
+│           ├── tables/
+│           ├── products/
+│           ├── sessions/
+│           └── order-items/
+├── src/components/
+├── src/lib/
+│   ├── prisma.ts     # Singleton Prisma client
+│   ├── auth.ts       # NextAuth config
+│   └── vat.ts        # Cálculo IVA
+├── middleware.ts     # Protecção de rotas
+├── Dockerfile
+├── docker-compose.yml
+├── docs/adr/
+└── mockups.html
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Desenvolvimento
 
-## Learn More
+```bash
+# Instalar dependências
+npm install
 
-To learn more about Next.js, take a look at the following resources:
+# Setup base de dados
+npx prisma migrate dev --name init
+npx prisma db seed
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Servidor de desenvolvimento
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Docker
 
-## Deploy on Vercel
+```bash
+docker compose up --build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+A aplicação fica disponível em `http://localhost:3000`.  
+O ficheiro SQLite é persistido em volume Docker: `./prisma/dev.db`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Decisões de Arquitectura
+
+| ADR | Título | Estado |
+|---|---|---|
+| [0001](docs/adr/0001-stack-selection.md) | Stack Selection | Aceite |

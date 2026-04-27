@@ -1,0 +1,15 @@
+services:
+  checkmesa:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "file:/data/dev.db"
+      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET}"
+      NEXTAUTH_URL: "http://localhost:3000"
+    volumes:
+      - checkmesa-db:/data
+    restart: unless-stopped
+
+volumes:
+  checkmesa-db:

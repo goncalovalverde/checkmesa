@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CheckMesa — Design System & Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════════════════
+   CHECKMESA DESIGN SYSTEM
+   Touch-first · Mobile/Tablet · Staff de Restauração PT
+   ══════════════════════════════════════════════════════ */
+:root {
+  /* ── BRAND ── */
+  --brand:          #1B6B5A;   /* teal escuro — premium, clean */
+  --brand-hover:    #155448;
+  --brand-light:    #E8F5F2;
+  --brand-muted:    #4A9E8D;
+  --brand-dark:     #0F3D34;   /* dark header/HUD */
+
+  /* ── SUPERFÍCIES ── */
+  --bg:             #F8F6F1;   /* off-white quente */
+  --bg-warm:        #F2EDE4;
+  --bg-card:        #FFFFFF;
+  --bg-elevated:    #FDFCF9;
+
+  /* ── TEXTO ── */
+  --text-primary:   #1C1C1A;
+  --text-secondary: #5C5853;
+  --text-muted:     #9C9690;
+  --text-inverse:   #FFFFFF;
+
+  /* ── BORDAS ── */
+  --border:         #E4DDD3;
+  --border-light:   #EDE9E2;
+  --border-focus:   var(--brand);
+
+  /* ── SEMÂNTICAS ── */
+  --success:        #1E7E45;
+  --success-bg:     #E8F5EE;
+  --error:          #C0392B;
+  --error-bg:       #FDECEA;
+  --warning:        #C87700;
+  --warning-bg:     #FEF3DC;
+  --info:           #1A6B9A;
+  --info-bg:        #E4F1F8;
+
+  /* ── STATUS MESAS ── */
+  --table-free:     #1E7E45;
+  --table-free-bg:  #E8F5EE;
+  --table-occ:      #C0392B;
+  --table-occ-bg:   #FDECEA;
+
+  /* ── TIPOGRAFIA ── */
+  --font-display: 'Bricolage Grotesque', 'Georgia', serif;
+  --font-ui:      'DM Sans', system-ui, sans-serif;
+
+  /* ── ESCALA TIPOGRÁFICA ── */
+  --text-xs:   0.70rem;   /* 11px — labels, badges */
+  --text-sm:   0.825rem;  /* 13px — metadados */
+  --text-base: 0.9375rem; /* 15px — body */
+  --text-md:   1rem;      /* 16px — UI labels */
+  --text-lg:   1.125rem;  /* 18px — subtítulos */
+  --text-xl:   1.375rem;  /* 22px — títulos ecrã */
+  --text-2xl:  1.75rem;   /* 28px — títulos secção */
+  --text-3xl:  2.25rem;   /* 36px — hero numbers */
+
+  /* ── ESPAÇAMENTO ── */
+  --s1: 0.25rem;
+  --s2: 0.5rem;
+  --s3: 0.75rem;
+  --s4: 1rem;
+  --s5: 1.25rem;
+  --s6: 1.5rem;
+  --s8: 2rem;
+  --s10: 2.5rem;
+  --s12: 3rem;
+
+  /* ── TOUCH TARGETS (mín. 44px WCAG) ── */
+  --touch-sm: 44px;
+  --touch-md: 52px;
+  --touch-lg: 60px;
+
+  /* ── RAIOS ── */
+  --r-xs:   6px;
+  --r-sm:   10px;
+  --r-md:   14px;
+  --r-lg:   18px;
+  --r-xl:   24px;
+  --r-2xl:  32px;
+  --r-full: 9999px;
+
+  /* ── SOMBRAS ── */
+  --shadow-xs: 0 1px 2px rgba(28,28,26,.04);
+  --shadow-sm: 0 2px 6px rgba(28,28,26,.06);
+  --shadow-md: 0 4px 16px rgba(28,28,26,.08);
+  --shadow-lg: 0 8px 32px rgba(28,28,26,.10);
+  --shadow-xl: 0 16px 48px rgba(28,28,26,.12);
+
+  /* ── ANIMAÇÕES ── */
+  --ease:      cubic-bezier(.16,1,.3,1);
+  --ease-in:   cubic-bezier(.65,0,.35,1);
+  --dur-fast:  120ms;
+  --dur-mid:   240ms;
+  --dur-slow:  400ms;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
+body {
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  background: #E8E4DC;
+  line-height: 1.55;
+}
+button, input, select { font-family: inherit; }
+
+/* ══════════════════════════════
+   LAYOUT DE APRESENTAÇÃO
+   ══════════════════════════════ */
+.page {
+  min-height: 100dvh;
+  scroll-snap-align: start;
+  padding: 72px var(--s6) var(--s12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s8);
+}
+.page:nth-child(even) { background: #DDD9CF; }
+.page:nth-child(odd)  { background: #E8E4DC; }
+
+.page-header {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+.page-label {
+  display: inline-block;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--brand-muted);
+  background: rgba(27,107,90,.1);
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  margin-bottom: var(--s3);
+}
+.page-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: var(--s1);
+}
+.page-sub { font-size: var(--text-sm); color: var(--text-secondary); }
+
+.frames {
+  display: flex;
+  gap: var(--s8);
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+.frame-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s3);
+}
+.frame-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ── PHONE SHELL ── */
+.phone {
+  width: 390px;
+  min-height: 780px;
+  background: var(--bg-card);
+  border-radius: 44px;
+  box-shadow: var(--shadow-xl), 0 0 0 8px #111112, 0 0 0 10px #2A2A2E;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.phone-notch {
+  height: 40px;
+  background: #111112;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.phone-notch-pill {
+  width: 120px; height: 10px;
+  background: #000;
+  border-radius: var(--r-full);
+}
+.phone-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.phone-scroll::-webkit-scrollbar { display: none; }
+
+/* TABLET SHELL */
+.tablet {
+  width: 640px;
+  min-height: 700px;
+  border-radius: 28px;
+}
+
+/* ══════════════════════════════
+   COMPONENTES UI CHECKMESA
+   ══════════════════════════════ */
+
+/* ── BOTÕES ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  min-height: var(--touch-md);
+  padding: 0 var(--s6);
+  border-radius: var(--r-md);
+  font-size: var(--text-md);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background var(--dur-fast) var(--ease),
+              transform  var(--dur-fast) var(--ease),
+              box-shadow var(--dur-fast) var(--ease);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(.97); }
+
+.btn-primary  { background: var(--brand);   color: #fff; box-shadow: 0 2px 8px rgba(27,107,90,.25); }
+.btn-primary:hover { background: var(--brand-hover); }
+.btn-danger   { background: var(--error);   color: #fff; box-shadow: 0 2px 8px rgba(192,57,43,.25); }
+.btn-success  { background: var(--success); color: #fff; }
+.btn-outline  { background: transparent; color: var(--brand); border: 2px solid var(--brand); }
+.btn-ghost    { background: var(--bg-warm); color: var(--text-secondary); }
+.btn-w100     { width: 100%; }
+.btn-lg       { min-height: var(--touch-lg); font-size: var(--text-lg); border-radius: var(--r-lg); }
+
+/* ── INPUTS ── */
+.input {
+  width: 100%;
+  min-height: var(--touch-md);
+  padding: 0 var(--s4);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  font-size: var(--text-md);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  transition: border-color var(--dur-fast);
+  outline: none;
+  -webkit-appearance: none;
+}
+.input:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(27,107,90,.12); }
+.input-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--s1);
+}
+.field { display: flex; flex-direction: column; gap: var(--s1); margin-bottom: var(--s4); }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--s2);
+  border-radius: var(--r-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1.6;
+}
+.badge-free  { background: var(--table-free-bg); color: var(--table-free); }
+.badge-occ   { background: var(--table-occ-bg);  color: var(--table-occ); }
+.badge-brand { background: var(--brand-light);   color: var(--brand); }
+.badge-warn  { background: var(--warning-bg);    color: var(--warning); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── TOP BAR DE APP ── */
+.app-bar {
+  padding: var(--s3) var(--s5);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.app-bar-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+.app-bar-back {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--brand);
+  background: none;
+  border: none;
+  cursor: pointer;
+  min-height: var(--touch-sm);
+  padding: 0;
+}
+
+/* ── HUD PERSISTENTE (Miller's Law) ── */
+.hud {
+  background: var(--brand-dark);
+  padding: var(--s3) var(--s5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: var(--s2);
+}
+.hud-cell { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.hud-val  { font-family: var(--font-display); font-size: var(--text-md); font-weight: 700; color: #fff; }
+.hud-lbl  { font-size: 0.6rem; color: rgba(255,255,255,.45); text-transform: uppercase; letter-spacing: .06em; }
+.hud-total .hud-val { color: #6EE7B7; font-size: var(--text-lg); }
+.hud-sep  { width: 1px; height: 32px; background: rgba(255,255,255,.1); flex-shrink: 0; }
+.hud-edit-btn {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  border-radius: var(--r-sm);
+  padding: 2px 8px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+/* ── CATEGORY TABS (Hick's Law) ── */
+.cat-bar {
+  display: flex;
+  gap: var(--s2);
+  padding: var(--s3) var(--s4);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+.cat-bar::-webkit-scrollbar { display: none; }
+.cat-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--s2) var(--s4);
+  border: 2px solid transparent;
+  border-radius: var(--r-md);
+  background: var(--bg-warm);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--dur-fast);
+  min-width: 68px;
+  min-height: var(--touch-sm);
+  justify-content: center;
+}
+.cat-tab.active {
+  border-color: var(--brand);
+  background: var(--brand-light);
+}
+.cat-tab .ct-icon { font-size: 1.3rem; line-height: 1; }
+.cat-tab .ct-name { font-size: var(--text-xs); font-weight: 600; color: var(--text-muted); }
+.cat-tab.active .ct-name { color: var(--brand); }
+
+/* ── PRODUCT GRID ── */
+.product-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s3);
+  padding: var(--s4);
+  overflow-y: auto;
+  flex: 1;
+}
+.product-grid::-webkit-scrollbar { display: none; }
+.prod-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s3) var(--s2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s1);
+  cursor: pointer;
+  min-height: 92px;
+  text-align: center;
+  transition: all var(--dur-fast) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.prod-card:active { transform: scale(.95); }
+.prod-card.added  { border-color: var(--brand); background: var(--brand-light); }
+.prod-card .pc-emoji { font-size: 1.8rem; line-height: 1; }
+.prod-card .pc-name  { font-size: var(--text-xs); font-weight: 600; color: var(--text-primary); line-height: 1.25; }
+.prod-card .pc-price { font-size: var(--text-sm); font-weight: 700; color: var(--brand); }
+.prod-card.added .pc-name  { color: var(--brand); }
+
+/* ── ORDER LIST ── */
+.order-list { display: flex; flex-direction: column; flex: 1; overflow-y: auto; }
+.order-list::-webkit-scrollbar { display: none; }
+.order-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s5);
+  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-card);
+  position: relative;
+  transition: background var(--dur-fast);
+}
+.order-row-info { flex: 1; min-width: 0; }
+.order-row-name  { font-size: var(--text-sm); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-row-unit  { font-size: var(--text-xs); color: var(--text-muted); }
+.qty-ctrl { display: flex; align-items: center; gap: var(--s2); flex-shrink: 0; }
+.qty-btn {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  border: 2px solid var(--border);
+  background: var(--bg-warm);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-primary);
+  transition: all var(--dur-fast);
+  flex-shrink: 0;
+}
+.qty-btn.minus { color: var(--error); border-color: var(--error-bg); background: var(--error-bg); }
+.qty-btn.plus  { color: var(--brand); border-color: var(--brand-light); background: var(--brand-light); }
+.qty-num { font-size: var(--text-md); font-weight: 700; min-width: 22px; text-align: center; }
+.order-row-total { font-size: var(--text-sm); font-weight: 700; min-width: 52px; text-align: right; color: var(--text-primary); }
+.swipe-hint {
+  position: absolute;
+  right: 0; top: 0; bottom: 0; width: 70px;
+  background: linear-gradient(to left, rgba(192,57,43,.15), transparent);
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: var(--s3);
+  pointer-events: none;
+  font-size: var(--text-sm);
+}
+
+/* ── TABLE MAP ── */
+.table-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s3);
+  padding: var(--s4);
+}
+.table-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: var(--s3) var(--s2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  min-height: 90px;
+  position: relative;
+  justify-content: center;
+  transition: all var(--dur-fast);
+}
+.table-card:active { transform: scale(.96); }
+.table-card.free { border-color: var(--table-free); }
+.table-card.occ  { border-color: var(--table-occ); background: var(--table-occ-bg); }
+.tc-num  { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; }
+.tc-icon { position: absolute; top: 8px; right: 8px; font-size: .85rem; }
+.tc-status { font-size: var(--text-xs); font-weight: 700; }
+.table-card.free .tc-status { color: var(--table-free); }
+.table-card.occ  .tc-status { color: var(--table-occ); }
+.tc-info { font-size: 0.65rem; color: var(--text-muted); text-align: center; line-height: 1.3; }
+
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  padding: var(--s3) var(--s4);
+  border-top: 1px solid var(--border);
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+
+/* ── TABS (Pedidos / Adicionar) ── */
+.screen-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border);
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+.screen-tab {
+  flex: 1;
+  padding: var(--s3);
+  text-align: center;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all var(--dur-fast);
+}
+.screen-tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+
+/* ── MODAL BOTTOM SHEET ── */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15,61,52,.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  z-index: 20;
+}
+.sheet {
+  background: var(--bg-card);
+  border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+  padding: var(--s6) var(--s5) var(--s10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+}
+.sheet-handle {
+  width: 44px; height: 4px;
+  background: var(--border);
+  border-radius: var(--r-full);
+  margin: 0 auto var(--s2);
+}
+.sheet-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; text-align: center; }
+.sheet-sub   { font-size: var(--text-sm); color: var(--text-secondary); text-align: center; }
+.big-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s5);
+  padding: var(--s4);
+  background: var(--bg-warm);
+  border-radius: var(--r-lg);
+}
+.big-num { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 800; color: var(--brand); min-width: 48px; text-align: center; }
+.big-btn {
+  width: 52px; height: 52px;
+  border-radius: var(--r-md);
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--dur-fast);
+  flex-shrink: 0;
+}
+.big-btn.minus { color: var(--error); border-color: var(--error-bg); background: var(--error-bg); }
+.big-btn.plus  { color: var(--brand); border-color: var(--brand-light); background: var(--brand-light); }
+
+/* ── CONSULTA / FATURA ── */
+.invoice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--s3) var(--s5);
+  border-bottom: 1px solid var(--border-light);
+  font-size: var(--text-sm);
+}
+.invoice-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--s4) var(--s5);
+  background: var(--brand-dark);
+  color: #fff;
+}
+.invoice-total span { font-size: var(--text-sm); color: rgba(255,255,255,.6); }
+.invoice-total strong { font-family: var(--font-display); font-size: var(--text-2xl); color: #6EE7B7; }
+
+/* ── DIVISÃO TABS ── */
+.split-bar {
+  display: flex;
+  gap: var(--s2);
+  padding: 0 var(--s5);
+  margin-bottom: var(--s4);
+}
+.split-tab {
+  flex: 1;
+  padding: var(--s3);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-warm);
+  cursor: pointer;
+  text-align: center;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all var(--dur-fast);
+  min-height: var(--touch-sm);
+}
+.split-tab.active { border-color: var(--brand); background: var(--brand-light); color: var(--brand); }
+
+/* ── PER-PERSON RESULT ── */
+.per-person-box {
+  background: var(--brand-light);
+  border: 2px solid var(--brand-muted);
+  border-radius: var(--r-lg);
+  padding: var(--s4);
+  text-align: center;
+}
+.pp-label { font-size: var(--text-xs); font-weight: 700; color: var(--brand); text-transform: uppercase; letter-spacing: .06em; }
+.pp-amount { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 800; color: var(--brand); }
+
+/* ── CONSUMO SPLIT ── */
+.person-chips { display: flex; gap: var(--s2); overflow-x: auto; margin-bottom: var(--s4); padding-bottom: 2px; }
+.person-chips::-webkit-scrollbar { display: none; }
+.person-chip {
+  flex-shrink: 0;
+  padding: var(--s2) var(--s4);
+  border: 2px solid var(--border);
+  border-radius: var(--r-full);
+  background: var(--bg-card);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--dur-fast);
+  min-height: var(--touch-sm);
+  display: flex; align-items: center;
+}
+.person-chip.active { border-color: var(--brand); background: var(--brand); color: #fff; }
+
+.consumo-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: var(--s2);
+  cursor: pointer;
+  transition: all var(--dur-fast);
+  min-height: var(--touch-sm);
+}
+.consumo-item.sel { border-color: var(--brand); background: var(--brand-light); }
+.ci-check {
+  width: 24px; height: 24px;
+  border-radius: var(--r-xs);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem;
+  flex-shrink: 0;
+}
+.consumo-item.sel .ci-check { background: var(--brand); border-color: var(--brand); color: #fff; }
+.ci-name { flex: 1; font-size: var(--text-sm); font-weight: 500; }
+.ci-price { font-size: var(--text-sm); font-weight: 700; color: var(--brand); }
+
+.subtotal-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--s3) var(--s4);
+  background: var(--brand-dark);
+  border-radius: var(--r-md);
+  margin-top: var(--s3);
+}
+.subtotal-bar span   { font-size: var(--text-xs); color: rgba(255,255,255,.55); }
+.subtotal-bar strong { font-family: var(--font-display); font-size: var(--text-lg); color: #6EE7B7; }
+
+/* ── SUCCESS STATE ── */
+.success-screen {
+  flex: 1;
+  background: var(--success);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s4);
+  padding: var(--s8);
+}
+.ss-icon   { font-size: 4.5rem; }
+.ss-title  { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; color: #fff; text-align: center; }
+.ss-amount { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 800; color: #fff; }
+.ss-sub    { font-size: var(--text-sm); color: rgba(255,255,255,.75); text-align: center; }
+
+/* ── ADMIN PRODUCTS ── */
+.admin-bar {
+  padding: var(--s4) var(--s5);
+  background: var(--brand-dark);
+  flex-shrink: 0;
+}
+.admin-bar h2 { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: #fff; }
+.admin-bar p  { font-size: var(--text-xs); color: rgba(255,255,255,.45); margin-top: 2px; }
+
+.type-toggle { display: flex; gap: var(--s2); }
+.type-btn {
+  flex: 1;
+  padding: var(--s3) var(--s2);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-warm);
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--dur-fast);
+  min-height: var(--touch-sm);
+}
+.type-btn .tb-icon { font-size: 1.5rem; }
+.type-btn .tb-name { font-size: var(--text-xs); font-weight: 700; color: var(--text-secondary); }
+.type-btn .tb-vat  { font-size: 0.65rem; color: var(--text-muted); }
+.type-btn.active-dish   { border-color: var(--warning); background: var(--warning-bg); }
+.type-btn.active-drink  { border-color: var(--info); background: var(--info-bg); }
+.type-btn.active-dish  .tb-name { color: var(--warning); }
+.type-btn.active-drink .tb-name { color: var(--info); }
+.type-btn.active-dish  .tb-vat  { color: var(--warning); }
+.type-btn.active-drink .tb-vat  { color: var(--info); }
+
+.vat-box {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s3) var(--s4);
+}
+.vat-box-title { font-size: var(--text-xs); font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: var(--s2); }
+.vat-row { display: flex; justify-content: space-between; align-items: center; font-size: var(--text-sm); padding: 3px 0; }
+.vat-row span    { color: var(--text-secondary); }
+.vat-row strong  { font-weight: 600; }
+.vat-row.hi strong { color: var(--brand); font-size: var(--text-md); font-weight: 700; }
+
+.pli {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s5);
+  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-card);
+}
+.pli-icon  { font-size: 1.5rem; flex-shrink: 0; }
+.pli-info  { flex: 1; min-width: 0; }
+.pli-name  { font-size: var(--text-sm); font-weight: 600; }
+.pli-meta  { font-size: 0.7rem; color: var(--text-muted); }
+.pli-price { font-family: var(--font-display); font-size: var(--text-md); font-weight: 700; color: var(--brand); flex-shrink: 0; }
+.pli-acts  { display: flex; gap: var(--s2); flex-shrink: 0; }
+.icon-btn  {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-warm);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem;
+  transition: all var(--dur-fast);
+}
+.icon-btn:hover { border-color: var(--brand); background: var(--brand-light); }
+
+/* ── UX CALLOUTS ── */
+.callouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+.callout {
+  display: flex;
+  gap: var(--s3);
+  align-items: flex-start;
+  background: rgba(255,255,255,.6);
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: var(--r-md);
+  padding: var(--s3) var(--s4);
+  flex: 1;
+  min-width: 240px;
+  max-width: 360px;
+  backdrop-filter: blur(4px);
+}
+.callout-icon  { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+.callout-text  { font-size: var(--text-xs); color: var(--text-secondary); line-height: 1.5; }
+.callout-text strong { display: block; font-size: var(--text-sm); font-weight: 700; color: var(--text-primary); margin-bottom: 1px; }
+
+/* ── SITE NAV ── */
+.site-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: rgba(15,61,52,.95);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--s6);
+  z-index: 100;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.site-nav-logo { font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: #6EE7B7; }
+.site-nav-right { display: flex; align-items: center; gap: var(--s4); }
+.nav-dots { display: flex; gap: var(--s2); align-items: center; }
+.nd {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.3);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--dur-mid);
+  padding: 0;
+}
+.nd.active { border-color: #6EE7B7; background: #6EE7B7; box-shadow: 0 0 6px rgba(110,231,183,.5); }
+.nd:hover  { border-color: rgba(255,255,255,.6); }
+.nav-lbl { font-size: var(--text-xs); color: rgba(255,255,255,.5); font-weight: 500; }
+
+/* ── PROGRESS BAR ── */
+.progress {
+  position: fixed;
+  top: 56px; left: 0;
+  height: 2px;
+  background: #6EE7B7;
+  width: 0%;
+  transition: width .1s;
+  z-index: 101;
+}
+
+/* ── SPLIT SECTION ── */
+.split-section { padding: var(--s5); flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: var(--s4); }
+.split-section::-webkit-scrollbar { display: none; }
+
+/* ── CUSTOM SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--r-full); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .tablet { width: 360px; }
+  .phone  { width: 360px; }
+  .frames { flex-direction: column; align-items: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- FIXED NAV -->
+<nav class="site-nav">
+  <span class="site-nav-logo">✅ CheckMesa</span>
+  <div class="site-nav-right">
+    <div class="nav-dots" id="ndots"></div>
+    <span class="nav-lbl" id="nlbl">–</span>
+  </div>
+</nav>
+<div class="progress" id="pbar"></div>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  ECRÃ 1 — LOGIN                     ║
+     ╚══════════════════════════════════════╝ -->
+<section class="page" id="p1">
+  <div class="page-header">
+    <span class="page-label">Ecrã 1 / 6</span>
+    <h2 class="page-title">Login</h2>
+    <p class="page-sub">Entrada individual. PIN rápido para ambiente de trabalho intenso — sem re-login durante o turno.</p>
+  </div>
+
+  <div class="frames">
+    <div class="frame-wrap">
+      <div class="phone">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="phone-scroll" style="background:var(--bg-warm)">
+
+          <!-- Logo -->
+          <div style="text-align:center;padding:var(--s12) var(--s6) var(--s8)">
+            <div style="font-size:3.5rem;margin-bottom:var(--s3)">🍽️</div>
+            <div style="font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--brand)">CheckMesa</div>
+            <div style="font-size:var(--text-sm);color:var(--text-muted);margin-top:4px">Gestão de Sala</div>
+          </div>
+
+          <!-- Form -->
+          <div style="padding:0 var(--s6) var(--s8)">
+            <div class="field">
+              <label class="input-label">Utilizador</label>
+              <input class="input" value="Miguel Ferreira" autocomplete="off">
+            </div>
+            <div class="field">
+              <label class="input-label">Password</label>
+              <input class="input" type="password" value="••••••••" inputmode="numeric">
+            </div>
+            <button class="btn btn-primary btn-w100 btn-lg" style="margin-top:var(--s2)">
+              Entrar na Sala
+            </button>
+            <p style="text-align:center;font-size:var(--text-xs);color:var(--text-muted);margin-top:var(--s6)">Acesso restrito a staff autorizado</p>
+          </div>
+
+        </div>
+      </div>
+      <div class="frame-label">Mobile — Login</div>
+    </div>
+  </div>
+
+  <div class="callouts">
+    <div class="callout"><span class="callout-icon">🔑</span><div class="callout-text"><strong>Sessão Persistente</strong>Token JWT com validade do turno (8h). Sem re-login para o staff durante o serviço.</div></div>
+    <div class="callout"><span class="callout-icon">📱</span><div class="callout-text"><strong>inputMode="numeric"</strong>PIN numérico activa teclado numérico no iOS/Android. Sem setas de incremento desnecessárias.</div></div>
+    <div class="callout"><span class="callout-icon">♿</span><div class="callout-text"><strong>A11y WCAG 2.1 AA</strong>Labels semânticos, aria-required, focus ring visível, contraste ≥ 4.5:1 em todos os textos.</div></div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  ECRÃ 2 — MAPA DE MESAS             ║
+     ╚══════════════════════════════════════╝ -->
+<section class="page" id="p2">
+  <div class="page-header">
+    <span class="page-label">Ecrã 2 / 6</span>
+    <h2 class="page-title">Mapa de Mesas</h2>
+    <p class="page-sub">Vista rápida da sala. Estado comunicado por cor + ícone + texto (acessibilidade para daltónicos).</p>
+  </div>
+
+  <div class="frames">
+    <div class="frame-wrap">
+      <div class="phone tablet">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="phone-scroll">
+
+          <!-- App bar -->
+          <div class="app-bar">
+            <span class="app-bar-title">🍽️ Sala Principal</span>
+            <div style="display:flex;align-items:center;gap:var(--s3)">
+              <span style="font-size:var(--text-xs);color:var(--text-secondary)">Miguel F.</span>
+              <button class="btn btn-ghost" style="min-height:36px;padding:0 var(--s3);font-size:var(--text-xs)">Sair</button>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div style="display:flex;gap:var(--s4);padding:var(--s3) var(--s5);background:var(--bg-warm);border-bottom:1px solid var(--border);font-size:var(--text-xs)">
+            <span style="display:flex;align-items:center;gap:4px"><span style="color:var(--table-free)">●</span> Livres: <strong>5</strong></span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="color:var(--table-occ)">●</span> Ocupadas: <strong>4</strong></span>
+            <span style="color:var(--text-muted)">Total: 9 mesas</span>
+          </div>
+
+          <!-- Table grid -->
+          <div class="table-grid">
+            <div class="table-card free">
+              <span class="tc-icon">✅</span>
+              <div class="tc-num">1</div>
+              <div class="tc-status">Livre</div>
+              <div class="tc-info">4 lugares</div>
+            </div>
+            <div class="table-card occ">
+              <span class="tc-icon">🔒</span>
+              <div class="tc-num">2</div>
+              <div class="tc-status">Ocupada</div>
+              <div class="tc-info">3 pessoas<br>28,50€</div>
+            </div>
+            <div class="table-card occ">
+              <span class="tc-icon">🔒</span>
+              <div class="tc-num">3</div>
+              <div class="tc-status">Ocupada</div>
+              <div class="tc-info">2 pessoas<br>42,00€</div>
+            </div>
+            <div class="table-card free">
+              <span class="tc-icon">✅</span>
+              <div class="tc-num">4</div>
+              <div class="tc-status">Livre</div>
+              <div class="tc-info">2 lugares</div>
+            </div>
+            <div class="table-card occ">
+              <span class="tc-icon">🔒</span>
+              <div class="tc-num">5</div>
+              <div class="tc-status">Ocupada</div>
+              <div class="tc-info">4 pessoas<br>67,20€</div>
+            </div>
+            <div class="table-card free">
+              <span class="tc-icon">✅</span>
+              <div class="tc-num">6</div>
+              <div class="tc-status">Livre</div>
+              <div class="tc-info">6 lugares</div>
+            </div>
+            <div class="table-card occ">
+              <span class="tc-icon">🔒</span>
+              <div class="tc-num">7</div>
+              <div class="tc-status">Ocupada</div>
+              <div class="tc-info">5 pessoas<br>91,80€</div>
+            </div>
+            <div class="table-card free">
+              <span class="tc-icon">✅</span>
+              <div class="tc-num">8</div>
+              <div class="tc-status">Livre</div>
+              <div class="tc-info">4 lugares</div>
+            </div>
+            <div class="table-card free">
+              <span class="tc-icon">✅</span>
+              <div class="tc-num">9</div>
+              <div class="tc-status">Livre</div>
+              <div class="tc-info">8 lugares</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="frame-label">Tablet — Mapa de Sala</div>
+    </div>
+  </div>
+
+  <div class="callouts">
+    <div class="callout"><span class="callout-icon">🎨</span><div class="callout-text"><strong>Cor + Ícone + Texto</strong>Estado da mesa nunca depende apenas de cor. Cobre daltónicas e contextos de baixo contraste (luz solar).</div></div>
+    <div class="callout"><span class="callout-icon">📊</span><div class="callout-text"><strong>Leitura em 1 segundo</strong>Contador de livres/ocupadas no topo. O staff avalia a sala antes de olhar para os cards.</div></div>
+    <div class="callout"><span class="callout-icon">✋</span><div class="callout-text"><strong>Fitts's Law</strong>Cards de 90px mínimo em grid 3×3. Área de toque confortável com polegar em qualquer orientação.</div></div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  ECRÃ 3 — ABRIR MESA (MODAL)        ║
+     ╚══════════════════════════════════════╝ -->
+<section class="page" id="p3">
+  <div class="page-header">
+    <span class="page-label">Ecrã 3 / 6</span>
+    <h2 class="page-title">Abrir Mesa</h2>
+    <p class="page-sub">Bottom sheet modal. Número de consumidores obrigatório antes de avançar — confirmado no próprio botão.</p>
+  </div>
+
+  <div class="frames">
+    <div class="frame-wrap">
+      <div class="phone" style="position:relative;">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="phone-scroll">
+          <!-- Mapa desfocado por baixo -->
+          <div class="app-bar"><span class="app-bar-title">🍽️ Sala Principal</span></div>
+          <div class="table-grid" style="opacity:.35;pointer-events:none">
+            <div class="table-card free"><span class="tc-icon">✅</span><div class="tc-num">1</div></div>
+            <div class="table-card free"><span class="tc-icon">✅</span><div class="tc-num">4</div></div>
+            <div class="table-card occ"><span class="tc-icon">🔒</span><div class="tc-num">3</div></div>
+          </div>
+        </div>
+
+        <!-- BOTTOM SHEET -->
+        <div class="overlay">
+          <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Abrir Mesa 4</div>
+            <div class="sheet-sub">Quantas pessoas vão sentar?</div>
+
+            <div class="big-stepper">
+              <button class="big-btn minus">−</button>
+              <span class="big-num">3</span>
+              <button class="big-btn plus">+</button>
+            </div>
+
+            <input class="input"
+              type="number"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              placeholder="Ou digita directamente…"
+              style="text-align:center;font-size:1.2rem;font-weight:700;letter-spacing:.05em">
+
+            <button class="btn btn-primary btn-w100 btn-lg">
+              ✅ Abrir Mesa 4 — 3 Pessoas
+            </button>
+            <button class="btn btn-ghost btn-w100">Cancelar</button>
+          </div>
+        </div>
+      </div>
+      <div class="frame-label">Mobile — Bottom Sheet</div>
+    </div>
+  </div>
+
+  <div class="callouts">
+    <div class="callout"><span class="callout-icon">🧠</span><div class="callout-text"><strong>Miller's Law</strong>O número "3 Pessoas" confirmado no botão — o staff não precisa de memorizar para o próximo ecrã.</div></div>
+    <div class="callout"><span class="callout-icon">🔢</span><div class="callout-text"><strong>inputMode="numeric"</strong>Activa teclado numérico nativo. pattern="[0-9]*" evita input tipo texto em iOS.</div></div>
+    <div class="callout"><span class="callout-icon">✋</span><div class="callout-text"><strong>Good Friction</strong>Passo obrigatório mas rápido: 2 toques em +/− ou digitar. Bottom sheet não bloqueia contexto.</div></div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  ECRÃ 4 — LANÇAMENTO DE PEDIDOS     ║
+     ╚══════════════════════════════════════╝ -->
+<section class="page" id="p4">
+  <div class="page-header">
+    <span class="page-label">Ecrã 4 / 6</span>
+    <h2 class="page-title">Lançamento de Pedidos</h2>
+    <p class="page-sub">HUD persistente (mesa/pessoas/total) + categorias para Progressive Disclosure + swipe para remover.</p>
+  </div>
+
+  <div class="frames">
+
+    <!-- VIEW A: ADICIONAR -->
+    <div class="frame-wrap">
+      <div class="phone" style="min-height:820px;">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="phone-scroll">
+          <!-- HUD -->
+          <div class="hud">
+            <div class="hud-cell">
+              <span class="hud-val">Mesa 4</span>
+              <span class="hud-lbl">Mesa</span>
+            </div>
+            <div class="hud-sep"></div>
+            <div class="hud-cell">
+              <span class="hud-val">3 👤</span>
+              <button class="hud-edit-btn">✎ editar</button>
+            </div>
+            <div class="hud-sep"></div>
+            <div class="hud-cell hud-total">
+              <span class="hud-val">28,50€</span>
+              <span class="hud-lbl">Total</span>
+            </div>
+            <div class="hud-sep"></div>
+            <div class="hud-cell">
+              <button class="btn btn-danger" style="min-height:36px;padding:0 var(--s3);font-size:var(--text-xs);font-weight:700;">CONTA</button>
+            </div>
+          </div>
+          <!-- TABS -->
+          <div class="screen-tabs">
+            <div class="screen-tab">📋 Pedidos (3)</div>
+            <div class="screen-tab active">➕ Adicionar</div>
+          </div>
+          <!-- CATEGORIES -->
+          <div class="cat-bar">
+            <div class="cat-tab"><div class="ct-icon">⏱️</div><div class="ct-name">Recentes</div></div>
+            <div class="cat-tab active"><div class="ct-icon">🍖</div><div class="ct-name">Pratos</div></div>
+            <div class="cat-tab"><div class="ct-icon">🥗</div><div class="ct-name">Entradas</div></div>
+            <div class="cat-tab"><div class="ct-icon">🍷</div><div class="ct-name">Bebidas</div></div>
+            <div class="cat-tab"><div class="ct-icon">🍰</div><div class="ct-name">Sobremesas</div></div>
+          </div>
+          <!-- PRODUCTS -->
+          <div class="product-grid">
+            <div class="prod-card added">
+              <span class="pc-emoji">🥩</span>
+              <span class="pc-name">Bitoque com Ovo</span>
+              <span class="pc-price">9,50€</span>
+            </div>
+            <div class="prod-card">
+              <span class="pc-emoji">🐟</span>
+              <span class="pc-name">Bacalhau à Brás</span>
+              <span class="pc-price">14,00€</span>
+            </div>
+            <div class="prod-card">
+              <span class="pc-emoji">🍗</span>
+              <span class="pc-name">Frango Assado ½</span>
+              <span class="pc-price">8,50€</span>
+            </div>
+            <div class="prod-card">
+              <span class="pc-emoji">🥩</span>
+              <span class="pc-name">Lombinho Grelhado</span>
+              <span class="pc-price">18,00€</span>
+            </div>
+            <div class="prod-card">
+              <span class="pc-emoji">🫘</span>
+              <span class="pc-name">Feijoada Trasmontana</span>
+              <span class="pc-price">11,00€</span>
+            </div>
+            <div class="prod-card">
+              <span class="pc-emoji">🐷</span>
+              <span class="pc-name">Rojões à Minhota</span>
+              <span class="pc-price">12,50€</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-label">Vista "Adicionar Produto"</div>
+    </div>
+
+    <!-- VIEW B: PEDIDOS -->
+    <div class="frame-wrap">
+      <div class="phone" style="min-height:820px;">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="phone-scroll">
+          <!-- HUD -->
+          <div class="hud">
+            <div class="hud-cell">
+              <span class="hud-val">Mesa 4</span>
+              <span class="hud-lbl">Mesa</span>
+            </div>
+            <div class="hud-sep"></div>
+            <div class="hud-cell">
+              <span class="hud-val">3 👤</span>
+              <button class="hud-edit-btn">✎ editar</button>
+            </div>
+            <div class="hud-sep"></div>
+            <div class="hud-cell hud-total">
+              <span class="hud-val">28,50€</span>
+              <span class="hud-lbl">Total</span>
+            </div>
+            <div class="hud-sep"></div>
+            <div class="hud-cell">
+              <button class="btn btn-danger" style="min-height:36px;padding:0 var(--s3);font-size:var(--text-xs);font-weight:700;">CONTA</button>
+            </div>
+          </div>
+          <!-- TABS -->
+          <div class="screen-tabs">
+            <div class="screen-tab active">📋 Pedidos (3)</div>
+            <div class="screen-tab">➕ Adicionar</div>
+          </div>
+          <!-- ORDER LIST -->
+          <div class="order-list">
+            <div class="order-row">
+              <div class="order-row-info">
+                <div class="order-row-name">🥩 Bitoque com Ovo</div>
+                <div class="order-row-unit">9,50€ / un.</div>
+              </div>
+              <div class="qty-ctrl">
+                <button class="qty-btn minus">−</button>
+                <span class="qty-num">2</span>
+                <button class="qty-btn plus">+</button>
+              </div>
+              <div class="order-row-total">19,00€</div>
+            </div>
+            <div class="order-row" style="overflow:hidden;">
+              <div class="order-row-info">
+                <div class="order-row-name">🐟 Bacalhau à Brás</div>
+                <div class="order-row-unit">14,00€ / un.</div>
+              </div>
+              <div class="qty-ctrl">
+                <button class="qty-btn minus">−</button>
+                <span class="qty-num">1</span>
+                <button class="qty-btn plus">+</button>
+              </div>
+              <div class="order-row-total">14,00€</div>
+              <div class="swipe-hint">🗑</div>
+            </div>
+            <div class="order-row">
+              <div class="order-row-info">
+                <div class="order-row-name">🍷 Vinho Tinto Meia Garrafa</div>
+                <div class="order-row-unit">5,50€ / un.</div>
+              </div>
+              <div class="qty-ctrl">
+                <button class="qty-btn minus">−</button>
+                <span class="qty-num">1</span>
+                <button class="qty-btn plus">+</button>
+              </div>
+              <div class="order-row-total">5,50€</div>
+            </div>
+          </div>
+          <div style="padding:var(--s2) var(--s5);font-size:0.65rem;color:var(--text-muted);text-align:center;background:var(--bg-warm);flex-shrink:0;">
+            ← desliza para a esquerda para remover
+          </div>
+          <div class="bottom-bar">
+            <button class="btn btn-danger btn-w100 btn-lg">📄 Emitir Consulta de Mesa</button>
+          </div>
+        </div>
+      </div>
+      <div class="frame-label">Vista "Pedidos" — editar/remover</div>
+    </div>
+
+  </div>
+
+  <div class="callouts">
+    <div class="callout"><span class="callout-icon">📌</span><div class="callout-text"><strong>HUD Persistente — Miller's Law</strong>Mesa, pessoas e total sempre visíveis. Tap em "✎ editar" ajusta consumidores sem sair do ecrã.</div></div>
+    <div class="callout"><span class="callout-icon">📁</span><div class="callout-text"><strong>Progressive Disclosure — Hick's Law</strong>60+ produtos reduzidos a 5-8 por categoria. Tab "Recentes" acelera relançamentos frequentes.</div></div>
+    <div class="callout"><span class="callout-icon">👆</span><div class="callout-text"><strong>Gestalt: Proximidade</strong>Remover item só por swipe intencional — separado dos botões +/− para prevenir erros com mãos húmidas.</div></div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  ECRÃ 5 — CONSULTA + DIVISÃO        ║
+     ╚══════════════════════════════════════╝ -->
+<section class="page" id="p5">
+  <div class="page-header">
+    <span class="page-label">Ecrã 5 / 6</span>
+    <h2 class="page-title">Consulta de Mesa + Divisão de Conta</h2>
+    <p class="page-sub">Default inteligente: divisão por pessoas imediata. Opção B (por consumo) disponível mas secundária.</p>
+  </div>
+
+  <div class="frames">
+
+    <!-- OPÇÃO A: Por Pessoas (DEFAULT) -->
+    <div class="frame-wrap">
+      <div class="phone" style="min-height:840px;">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="phone-scroll">
+          <div class="app-bar">
+            <button class="app-bar-back">← Mesa 4</button>
+            <span class="badge badge-occ">🔒 Ocupada</span>
+          </div>
+          <div style="padding:var(--s3) var(--s5) var(--s1);background:var(--bg-card)">
+            <div style="font-family:var(--font-display);font-size:var(--text-lg);font-weight:700">📄 Consulta Mesa 4</div>
+          </div>
+          <!-- Items -->
+          <div class="invoice-item"><span>🥩 Bitoque com Ovo × 2</span><strong>19,00€</strong></div>
+          <div class="invoice-item"><span>🐟 Bacalhau à Brás × 1</span><strong>14,00€</strong></div>
+          <div class="invoice-item"><span>🍷 Vinho Tinto (meia) × 1</span><strong>5,50€</strong></div>
+          <div class="invoice-total">
+            <span>Total da Mesa</span>
+            <strong>38,50€</strong>
+          </div>
+          <!-- SPLIT -->
+          <div class="split-section">
+            <div style="font-family:var(--font-display);font-size:var(--text-md);font-weight:700">Dividir Conta</div>
+            <div class="split-bar" style="padding:0">
+              <div class="split-tab active">👥 Por Pessoas</div>
+              <div class="split-tab">🍽️ Por Consumo</div>
+            </div>
+            <!-- DEFAULT: por pessoas -->
+            <div style="display:flex;align-items:center;gap:var(--s3);background:var(--bg-warm);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--s3) var(--s4)">
+              <span style="flex:1;font-size:var(--text-sm);font-weight:500;color:var(--text-secondary)">Pessoas a pagar</span>
+              <div style="display:flex;align-items:center;gap:var(--s3)">
+                <button class="qty-btn minus" style="width:40px;height:40px">−</button>
+                <span style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:var(--brand);min-width:28px;text-align:center">3</span>
+                <button class="qty-btn plus"  style="width:40px;height:40px">+</button>
+              </div>
+            </div>
+            <div class="per-person-box">
+              <div class="pp-label">Cada pessoa paga</div>
+              <div class="pp-amount">12,83€</div>
+            </div>
+            <button class="btn btn-primary btn-w100 btn-lg">✅ Confirmar e Fechar Mesa</button>
+            <p style="font-size:0.7rem;color:var(--text-muted);text-align:center">A mesa ficará marcada como <strong>Livre</strong> após o fecho</p>
+          </div>
+        </div>
+      </div>
+      <div class="frame-label">Opção A — Divisão por Pessoas (default)</div>
+    </div>
+
+    <!-- OPÇÃO B: Por Consumo -->
+    <div class="frame-wrap">
+      <div class="phone" style="min-height:840px;">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="phone-scroll">
+          <div class="app-bar">
+            <button class="app-bar-back">← Mesa 4</button>
+            <span class="badge badge-occ">🔒 Ocupada</span>
+          </div>
+          <div class="invoice-total" style="padding:var(--s3) var(--s5)">
+            <span>Total da Mesa</span>
+            <strong>38,50€</strong>
+          </div>
+          <div class="split-section">
+            <div style="font-family:var(--font-display);font-size:var(--text-md);font-weight:700">Dividir Conta</div>
+            <div class="split-bar" style="padding:0">
+              <div class="split-tab">👥 Por Pessoas</div>
+              <div class="split-tab active">🍽️ Por Consumo</div>
+            </div>
+            <!-- Person selector -->
+            <div class="person-chips">
+              <div class="person-chip active">Pessoa 1</div>
+              <div class="person-chip">Pessoa 2</div>
+              <div class="person-chip">Pessoa 3</div>
+            </div>
+            <p style="font-size:var(--text-xs);color:var(--text-secondary);margin-bottom:var(--s2)">Seleciona o que a <strong>Pessoa 1</strong> vai pagar:</p>
+            <div class="consumo-item sel">
+              <div class="ci-check">✓</div>
+              <div class="ci-name">🥩 Bitoque com Ovo</div>
+              <div class="ci-price">9,50€</div>
+            </div>
+            <div class="consumo-item">
+              <div class="ci-check"></div>
+              <div class="ci-name">🥩 Bitoque com Ovo</div>
+              <div class="ci-price">9,50€</div>
+            </div>
+            <div class="consumo-item">
+              <div class="ci-check"></div>
+              <div class="ci-name">🐟 Bacalhau à Brás</div>
+              <div class="ci-price">14,00€</div>
+            </div>
+            <div class="consumo-item sel">
+              <div class="ci-check">✓</div>
+              <div class="ci-name">🍷 Vinho Tinto (meia)</div>
+              <div class="ci-price">5,50€</div>
+            </div>
+            <div class="subtotal-bar">
+              <span>Pessoa 1 paga</span>
+              <strong>15,00€</strong>
+            </div>
+            <button class="btn btn-primary btn-w100">Próxima Pessoa →</button>
+          </div>
+        </div>
+      </div>
+      <div class="frame-label">Opção B — Divisão por Consumo</div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="frame-wrap">
+      <div class="phone" style="min-height:500px;">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="success-screen">
+          <div class="ss-icon">✅</div>
+          <div class="ss-title">Mesa 4 Fechada!</div>
+          <div class="ss-amount">38,50€</div>
+          <div class="ss-sub">Mesa marcada como Livre.<br>Bom trabalho!</div>
+          <button class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.4);margin-top:var(--s4)">← Voltar à Sala</button>
+        </div>
+      </div>
+      <div class="frame-label">Peak-End Rule — Fecho com Sucesso</div>
+    </div>
+
+  </div>
+
+  <div class="callouts">
+    <div class="callout"><span class="callout-icon">🎯</span><div class="callout-text"><strong>Default Inteligente</strong>80% dos casos é por pessoas — valor calculado imediatamente, sem acção extra. Hick's Law aplicado.</div></div>
+    <div class="callout"><span class="callout-icon">🎉</span><div class="callout-text"><strong>Peak-End Rule</strong>Fecho com ecrã verde + montante total. Micro-momento positivo que elimina a dúvida "fechei mesmo?"</div></div>
+    <div class="callout"><span class="callout-icon">🧮</span><div class="callout-text"><strong>Divisão por Consumo Simplificada</strong>Item inteiro por pessoa — sem fraccionamento. Modelo de dados O(n) vs. O(n²). UX sem ambiguidade.</div></div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  ECRÃ 6 — ADMIN PRODUTOS + IVA      ║
+     ╚══════════════════════════════════════╝ -->
+<section class="page" id="p6">
+  <div class="page-header">
+    <span class="page-label">Ecrã 6 / 6</span>
+    <h2 class="page-title">Backoffice — Catálogo de Produtos</h2>
+    <p class="page-sub">Preço final → IVA calculado automaticamente (PRATO 13% / BEBIDA 23%). Campo <code>category</code> para Progressive Disclosure.</p>
+  </div>
+
+  <div class="frames">
+    <div class="frame-wrap">
+      <div class="phone tablet" style="min-height:760px;">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="phone-scroll">
+
+          <div class="admin-bar">
+            <h2>⚙️ Catálogo de Produtos</h2>
+            <p>IVA calculado automaticamente ao inserir o preço final</p>
+          </div>
+
+          <!-- FORM -->
+          <div style="padding:var(--s4) var(--s5);background:var(--bg-card);border-bottom:1px solid var(--border)">
+            <div style="font-size:var(--text-sm);font-weight:700;color:var(--text-secondary);margin-bottom:var(--s4)">➕ Novo Produto</div>
+
+            <div class="field">
+              <label class="input-label">Nome do Produto</label>
+              <input class="input" value="Bitoque com Ovo">
+            </div>
+
+            <div class="field">
+              <label class="input-label">Categoria</label>
+              <select class="input" style="appearance:auto;cursor:pointer">
+                <option>🍖 Pratos</option>
+                <option>🥗 Entradas</option>
+                <option>🍷 Bebidas</option>
+                <option>🍰 Sobremesas</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label class="input-label">Tipo (define taxa de IVA)</label>
+              <div class="type-toggle">
+                <div class="type-btn active-dish">
+                  <div class="tb-icon">🍽️</div>
+                  <div class="tb-name">Prato</div>
+                  <div class="tb-vat">IVA 13%</div>
+                </div>
+                <div class="type-btn">
+                  <div class="tb-icon">🥤</div>
+                  <div class="tb-name">Bebida</div>
+                  <div class="tb-vat">IVA 23%</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="input-label">Preço Final — o que o cliente paga (€)</label>
+              <input class="input" type="number" inputmode="decimal" value="9.50" style="font-size:1.1rem;font-weight:700">
+            </div>
+
+            <!-- IVA Breakdown — calculado em tempo real -->
+            <div class="vat-box">
+              <div class="vat-box-title">Breakdown IVA — calculado automaticamente</div>
+              <div class="vat-row hi">
+                <span>Preço Final (cliente paga)</span>
+                <strong>9,50€</strong>
+              </div>
+              <div class="vat-row">
+                <span>Taxa aplicada</span>
+                <strong>13% (Prato)</strong>
+              </div>
+              <div class="vat-row">
+                <span>Valor Base (sem IVA)</span>
+                <strong>8,41€</strong>
+              </div>
+              <div class="vat-row">
+                <span>Valor IVA</span>
+                <strong>1,09€</strong>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-w100" style="margin-top:var(--s4)">Guardar Produto</button>
+          </div>
+
+          <!-- PRODUCT LIST -->
+          <div style="padding:var(--s2) var(--s5) var(--s1);font-size:var(--text-xs);font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;background:var(--bg-warm)">Produtos Activos</div>
+          <div class="pli">
+            <div class="pli-icon">🥩</div>
+            <div class="pli-info">
+              <div class="pli-name">Bitoque com Ovo</div>
+              <div class="pli-meta">🍖 Pratos · Prato · IVA 13% · Base: 8,41€</div>
+            </div>
+            <div class="pli-price">9,50€</div>
+            <div class="pli-acts">
+              <button class="icon-btn" title="Editar">✏️</button>
+              <button class="icon-btn" title="Desactivar">🚫</button>
+            </div>
+          </div>
+          <div class="pli">
+            <div class="pli-icon">🍷</div>
+            <div class="pli-info">
+              <div class="pli-name">Vinho Tinto Meia Garrafa</div>
+              <div class="pli-meta">🍷 Bebidas · Bebida · IVA 23% · Base: 4,47€</div>
+            </div>
+            <div class="pli-price">5,50€</div>
+            <div class="pli-acts">
+              <button class="icon-btn" title="Editar">✏️</button>
+              <button class="icon-btn" title="Desactivar">🚫</button>
+            </div>
+          </div>
+          <div class="pli">
+            <div class="pli-icon">🐟</div>
+            <div class="pli-info">
+              <div class="pli-name">Bacalhau à Brás</div>
+              <div class="pli-meta">🍖 Pratos · Prato · IVA 13% · Base: 12,39€</div>
+            </div>
+            <div class="pli-price">14,00€</div>
+            <div class="pli-acts">
+              <button class="icon-btn" title="Editar">✏️</button>
+              <button class="icon-btn" title="Desactivar">🚫</button>
+            </div>
+          </div>
+          <div class="pli" style="opacity:.4">
+            <div class="pli-icon" style="filter:grayscale(1)">🫘</div>
+            <div class="pli-info">
+              <div class="pli-name" style="text-decoration:line-through;color:var(--text-muted)">Feijoada Trasmontana</div>
+              <div class="pli-meta">🍖 Pratos · Desactivado</div>
+            </div>
+            <div class="pli-price" style="color:var(--text-muted)">11,00€</div>
+            <div class="pli-acts">
+              <button class="icon-btn" title="Activar">✅</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="frame-label">Tablet — Admin Backoffice</div>
+    </div>
+  </div>
+
+  <div class="callouts">
+    <div class="callout"><span class="callout-icon">🧮</span><div class="callout-text"><strong>IVA em Tempo Real</strong>Breakdown actualiza ao digitar. Zero ambiguidade — o gestor vê exatamente o que é guardado em BD.</div></div>
+    <div class="callout"><span class="callout-icon">📁</span><div class="callout-text"><strong>Campo category adicionado</strong>Necessário para Progressive Disclosure no frontoffice. Schema Prisma: <code>category String</code>.</div></div>
+    <div class="callout"><span class="callout-icon">🚫</span><div class="callout-text"><strong>Soft Delete</strong>Produtos desactivados (não apagados) para preservar histórico de OrderItems e integridade contabilística.</div></div>
+  </div>
+</section>
+
+<!-- JAVASCRIPT NAV -->
+<script>
+(function () {
+  const pages   = document.querySelectorAll('.page');
+  const ndots   = document.getElementById('ndots');
+  const nlbl    = document.getElementById('nlbl');
+  const pbar    = document.getElementById('pbar');
+  const labels  = ['Login', 'Mapa de Mesas', 'Abrir Mesa', 'Pedidos', 'Consulta', 'Admin'];
+
+  // Build nav dots
+  pages.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'nd' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', labels[i]);
+    d.title = labels[i];
+    d.addEventListener('click', () => pages[i].scrollIntoView({ behavior: 'smooth' }));
+    ndots.appendChild(d);
+  });
+
+  const dots = ndots.querySelectorAll('.nd');
+
+  // Intersection observer for active state
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const i = [...pages].indexOf(e.target);
+        dots.forEach((d, j) => d.classList.toggle('active', j === i));
+        nlbl.textContent = labels[i] ?? '';
+      }
+    });
+  }, { threshold: 0.4 });
+
+  pages.forEach(p => io.observe(p));
+
+  // Progress bar
+  const updateProgress = () => {
+    const sh = document.documentElement.scrollHeight - window.innerHeight;
+    pbar.style.width = sh > 0 ? (window.scrollY / sh * 100) + '%' : '0%';
+  };
+  window.addEventListener('scroll', () => requestAnimationFrame(updateProgress), { passive: true });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+    const cur = [...dots].findIndex(d => d.classList.contains('active'));
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowRight') && cur < pages.length - 1) {
+      pages[cur + 1].scrollIntoView({ behavior: 'smooth' }); e.preventDefault();
+    }
+    if ((e.key === 'ArrowUp' || e.key === 'ArrowLeft') && cur > 0) {
+      pages[cur - 1].scrollIntoView({ behavior: 'smooth' }); e.preventDefault();
+    }
+  });
+})();
+</script>
+</body>
+</html>

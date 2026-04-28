@@ -89,7 +89,7 @@ npx prisma db seed
 npm run dev
 ```
 
-## Docker
+## Docker (desenvolvimento local)
 
 ```bash
 docker compose up --build
@@ -97,6 +97,45 @@ docker compose up --build
 
 A aplicação fica disponível em `http://localhost:3000`.  
 O ficheiro SQLite é persistido em volume Docker: `./prisma/dev.db`.
+
+## Deployment (Orange Pi)
+
+O pipeline CI/CD está em `.github/workflows/deploy.yml`. A cada push em `main`:
+
+1. Corre os testes (`npm test`)
+2. SSHa para o Orange Pi, faz `git pull`, constrói a imagem nativamente (ARM64) e reinicia o container
+
+### Configuração inicial no Orange Pi
+
+```bash
+# Clonar repositório
+git clone <repo-url> /opt/checkmesa
+
+# Criar ficheiro de segredos (nunca sai da LAN)
+cat > /opt/checkmesa/.env <<EOF
+NEXTAUTH_SECRET=<segredo-aleatório-32-chars>
+NEXTAUTH_URL=https://checkmesa.instavel.org
+EOF
+chmod 600 /opt/checkmesa/.env
+```
+
+### Secrets necessários no GitHub (Settings → Secrets → Actions)
+
+| Secret | Descrição |
+|---|---|
+| `DEPLOY_HOST` | IP ou hostname do Orange Pi |
+| `DEPLOY_USER` | Utilizador SSH (ex: `orangepi`) |
+| `DEPLOY_SSH_KEY` | Chave privada Ed25519 |
+
+### Gerar par de chaves dedicado
+
+```bash
+ssh-keygen -t ed25519 -C "checkmesa-deploy" -f ~/.ssh/checkmesa_deploy -N ""
+# Chave privada → DEPLOY_SSH_KEY (GitHub Secret)
+# Chave pública → ~/.ssh/authorized_keys no Orange Pi
+```
+
+> Ver [ADR-0005](docs/adr/0005-deploy-orange-pi-ssh.md) para a decisão arquitectural completa.
 
 ## Diagramas UML
 
@@ -118,3 +157,4 @@ O ficheiro SQLite é persistido em volume Docker: `./prisma/dev.db`.
 | [0002](docs/adr/0002-prisma-v5-downgrade.md) | Prisma v5 Downgrade | Aceite |
 | [0003](docs/adr/0003-test-suite.md) | Test Suite (Jest + RTL) | Aceite |
 | [0004](docs/adr/0004-auth-guard-centralisation.md) | Centralised Auth Guard | Aceite |
+| [0005](docs/adr/0005-deploy-orange-pi-ssh.md) | Deploy Orange Pi via SSH Build | Aceite |

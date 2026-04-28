@@ -1,0 +1,96 @@
+# Runs the test suite on every push/PR to main.
+# Deploys to the Orange Pi via SSH only when tests pass on a push to main.
+#
+# Required GitHub repository secrets:
+#   DEPLOY_HOST      — Orange Pi IP address or hostname
+#   DEPLOY_USER      — SSH username (e.g. orangepi)
+#   DEPLOY_SSH_KEY   — Ed25519 private key (the matching public key must be in
+#                      ~/.ssh/authorized_keys on the device)
+#
+# One-time setup on the Orange Pi (see README § Deployment):
+#   1. Clone the repo to /opt/checkmesa
+#   2. Create /opt/checkmesa/.env with NEXTAUTH_SECRET and NEXTAUTH_URL
+#   3. Ensure the deploy user can run `docker` without sudo
+
+name: CI / Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Job 1: Test ─────────────────────────────────────────────────────────────
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run test suite
+        run: npm test -- --passWithNoTests
+
+  # ── Job 2: Deploy ───────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Orange Pi
+    needs: test
+    # Only deploy on direct pushes to main (not on pull requests)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: SSH → pull, build, restart
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: 22
+          # Script runs on the Orange Pi.
+          # Secrets (NEXTAUTH_SECRET, NEXTAUTH_URL) are stored in
+          # /opt/checkmesa/.env on the device — never sent over the wire.
+          script: |
+            set -euo pipefail
+            APP_DIR="/opt/checkmesa"
+
+            echo "── [1/4] Pull latest code ──────────────────────────────"
+            cd "$APP_DIR"
+            git pull origin main
+
+            echo "── [2/4] Build image ────────────────────────────────────"
+            docker build -t checkmesa:latest .
+
+            echo "── [3/4] Swap container ─────────────────────────────────"
+            docker stop checkmesa 2>/dev/null || true
+            docker rm   checkmesa 2>/dev/null || true
+
+            docker run -d \
+              --name checkmesa \
+              --restart unless-stopped \
+              -p 3000:3000 \
+              -v checkmesa-db:/data \
+              --env-file "$APP_DIR/.env" \
+              -e DATABASE_URL="file:/data/dev.db" \
+              checkmesa:latest
+
+            echo "── [4/4] Health check ───────────────────────────────────"
+            sleep 8
+            if docker ps --filter "name=checkmesa" --filter "status=running" | grep -q checkmesa; then
+              echo "✓ Container is running"
+            else
+              echo "✗ Container failed to start"
+              docker logs --tail 50 checkmesa || true
+              exit 1
+            fi

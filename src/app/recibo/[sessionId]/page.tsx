@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { ROUTES } from "@/lib/routes";
 import { ThermalReceiptBody, type ReceiptData } from "@/components/ThermalReceiptBody";
 
 type Params = { params: Promise<{ sessionId: string }> };
@@ -10,7 +11,7 @@ export default async function ReciboPage({ params }: Params) {
   const { sessionId } = await params;
 
   const authSession = await getServerSession(authOptions);
-  if (!authSession) redirect("/login");
+  if (!authSession) redirect(ROUTES.login);
 
   const record = await prisma.tableSession.findUnique({
     where: { id: sessionId },

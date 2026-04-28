@@ -1,5 +1,6 @@
 "use client";
 import { signOut } from "next-auth/react";
+import { ROUTES } from "@/lib/routes";
 
 export function LogoutButton({ userName }: { userName?: string | null }) {
   return (
@@ -21,7 +22,7 @@ export function LogoutButton({ userName }: { userName?: string | null }) {
         </p>
       )}
       <button
-        onClick={() => signOut({ callbackUrl: "/login" })}
+        onClick={() => signOut({ callbackUrl: ROUTES.login })}
         className="admin-nav-item"
         style={{ width: "100%", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.7)" }}
       >

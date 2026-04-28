@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { OpenTableModal } from "@/components/sala/OpenTableModal";
+import { ROUTES } from "@/lib/routes";
 
 interface Table {
   id: string;
@@ -58,7 +59,7 @@ export default function SalaPage() {
   }, []);
 
   useEffect(() => {
-    if (status === "unauthenticated") router.push("/login");
+    if (status === "unauthenticated") router.push(ROUTES.login);
   }, [status, router]);
 
   useEffect(() => {
@@ -87,7 +88,7 @@ export default function SalaPage() {
               Admin
             </button>
           )}
-          <button onClick={() => signOut({ callbackUrl: "/login" })} className="btn btn-ghost" style={{ minHeight: "var(--touch-sm)", padding: "0 var(--s3)", fontSize: "var(--text-sm)" }}>
+          <button onClick={() => signOut({ callbackUrl: ROUTES.login })} className="btn btn-ghost" style={{ minHeight: "var(--touch-sm)", padding: "0 var(--s3)", fontSize: "var(--text-sm)" }}>
             Sair
           </button>
         </div>

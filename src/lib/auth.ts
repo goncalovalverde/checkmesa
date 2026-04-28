@@ -2,6 +2,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
+import { ROUTES } from "./routes";
 import { ROLES, type Role } from "./roles";
 
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
@@ -67,5 +68,5 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  pages: { signIn: "/login" },
+  pages: { signIn: ROUTES.login },
 };

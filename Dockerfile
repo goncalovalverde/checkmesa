@@ -32,6 +32,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
+# OpenSSL is required by Prisma engines for SSL detection at runtime.
+# libssl1.1 is not in Alpine by default; install it before copying engines.
+RUN apk add --no-cache openssl
+
 # Copy public assets and standalone output
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -40,10 +44,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy Prisma schema + migrations (needed for runtime migrations).
 # Copy the entire @prisma namespace — the CLI (prisma/build/index.js) requires
 # @prisma/engines, @prisma/debug, @prisma/get-platform, etc. at runtime.
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+# --chown ensures the nextjs user can write engine resolution metadata at startup.
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 
 USER nextjs
 

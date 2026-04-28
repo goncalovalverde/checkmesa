@@ -44,7 +44,13 @@ jobs:
         # --audit-level=high fails the job on high/critical vulnerabilities only.
         # --omit=dev excludes test toolchain packages (jest, jsdom, etc.) that
         # never reach the production Docker image.
-        run: npm audit --omit=dev --audit-level=high
+        # pipefail preserves npm audit's exit code through the tee pipe.
+        run: |
+          set -o pipefail
+          echo "## 🔒 npm audit (production)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          npm audit --omit=dev --audit-level=high 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   # ── Job 2: Deploy (self-hosted Orange Pi) ───────────────────────────────────
   deploy:

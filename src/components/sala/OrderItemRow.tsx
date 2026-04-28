@@ -9,7 +9,6 @@ interface OrderItem {
   product: {
     id: string;
     name: string;
-    type: string;
     category: string;
     finalPrice: number;
     basePrice: number;

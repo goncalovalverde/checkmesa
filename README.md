@@ -123,7 +123,6 @@ sudo usermod -aG docker $USER
 | `NEXTAUTH_SECRET` | *(gerado abaixo)* | Segredo aleatório de 32+ chars para assinatura de sessões |
 | `NEXTAUTH_URL` | `https://checkmesa.instavel.org` | URL pública da aplicação — usada pelo NextAuth para callbacks OAuth e CSRF |
 | `SEED_ADMIN_PASSWORD` | *(password forte)* | Password do utilizador admin criado no primeiro deploy |
-| `SEED_STAFF_PASSWORD` | *(password forte)* | Password do utilizador staff criado no primeiro deploy |
 
 ```bash
 # Gerar um segredo seguro:

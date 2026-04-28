@@ -115,18 +115,17 @@ jobs:
       - name: Seed initial data
         env:
           SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
-          SEED_STAFF_PASSWORD: ${{ secrets.SEED_STAFF_PASSWORD }}
         run: |
-          if [ -z "$SEED_ADMIN_PASSWORD" ] || [ -z "$SEED_STAFF_PASSWORD" ]; then
-            echo "⚠ Skipping seed — SEED_ADMIN_PASSWORD or SEED_STAFF_PASSWORD not set"
+          if [ -z "$SEED_ADMIN_PASSWORD" ]; then
+            echo "⚠ Skipping seed — SEED_ADMIN_PASSWORD not set"
             exit 0
           fi
 
-          # Idempotent: only creates users if none exist yet.
+          # Idempotent: only creates the admin user if no users exist yet.
+          # Staff users are created by the admin through the application UI.
           # Runs after health check so Prisma client is fully ready.
           docker exec \
             -e SEED_ADMIN_PASSWORD="$SEED_ADMIN_PASSWORD" \
-            -e SEED_STAFF_PASSWORD="$SEED_STAFF_PASSWORD" \
             checkmesa node -e "
               const { PrismaClient } = require('@prisma/client');
               const bcrypt = require('bcryptjs');
@@ -134,13 +133,9 @@ jobs:
               async function run() {
                 const count = await prisma.user.count();
                 if (count > 0) { console.log('✓ Users already exist — skipping seed'); return; }
-                const [adminHash, staffHash] = await Promise.all([
-                  bcrypt.hash(process.env.SEED_ADMIN_PASSWORD, 12),
-                  bcrypt.hash(process.env.SEED_STAFF_PASSWORD, 12),
-                ]);
+                const adminHash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD, 12);
                 await prisma.user.create({ data: { name: 'Administrador', email: 'admin@checkmesa.pt', password: adminHash, role: 'ADMIN' } });
-                await prisma.user.create({ data: { name: 'Staff',          email: 'staff@checkmesa.pt',  password: staffHash,  role: 'STAFF'  } });
-                console.log('✓ Seed concluído — 2 utilizadores criados');
+                console.log('✓ Seed concluído — admin criado');
               }
               run().catch(e => { console.error(e); process.exit(1); }).finally(() => prisma.\$disconnect());
             "

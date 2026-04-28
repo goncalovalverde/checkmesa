@@ -72,5 +72,4 @@ sudo usermod -aG docker $USER
 | `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
 | `NEXTAUTH_URL` | URL pública da aplicação, ex: `https://checkmesa.instavel.org` |
 | `SEED_ADMIN_PASSWORD` | Password forte para o utilizador admin (só usada no primeiro deploy) |
-| `SEED_STAFF_PASSWORD` | Password forte para o utilizador staff (só usada no primeiro deploy) |
 

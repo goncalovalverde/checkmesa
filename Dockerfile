@@ -49,6 +49,13 @@ USER nextjs
 
 EXPOSE 3000
 
+# Docker-native health monitoring — visible in `docker ps` and `docker inspect`.
+# Complements (but does not replace) the CI probe: the CI probe gates deployment,
+# this instruction gates container restarts / orchestrator scheduling.
+# --start-period gives migrations time to complete before the first probe fires.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD wget -qO- http://localhost:3000/api/health | grep -q '"status":"ok"' || exit 1
+
 # Run migrations then start the app.
 # Use `node` directly — node_modules/.bin/ is not copied to the runner stage.
 CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node server.js"]

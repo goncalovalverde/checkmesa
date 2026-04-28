@@ -34,34 +34,6 @@ Aplicação web de gestão de sala para staff de restauração. Optimizada para 
 - **Por Pessoas** → `total / N` (default)
 - **Por Consumo** → seleção manual de itens inteiros por pessoa
 
-## Modelo de Dados
-
-```
-User            Table           Product
-─────────────   ─────────────   ──────────────────────
-id              id              id
-name            name            name
-email           capacity        category
-passwordHash    status          type (DRINK|DISH)
-role            └ FREE          finalPrice
-└ ADMIN         └ OCCUPIED      basePrice
-└ STAFF                         vatAmount
-                                vatRate
-                                active
-
-TableSession    OrderItem
-─────────────   ─────────────
-id              id
-tableId ──────► sessionId ──►
-openedBy        productId ──►
-consumers       quantity
-status          unitPrice (snapshot)
-└ OPEN          addedAt
-└ CLOSED
-openedAt
-closedAt
-```
-
 ## Estrutura de Ficheiros
 
 ```

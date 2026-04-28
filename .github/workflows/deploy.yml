@@ -66,6 +66,12 @@ jobs:
             "$NEXTAUTH_SECRET" \
             "https://checkmesa.instavel.org" > /tmp/checkmesa.env
 
+          # Ensure the named volume's /data directory is owned by uid/gid 1001
+          # (nextjs:nodejs). This is a no-op on a fresh volume but fixes ownership
+          # on existing volumes that were previously created as root.
+          docker run --rm -v checkmesa-db:/data alpine \
+            chown -R 1001:1001 /data
+
           docker stop checkmesa 2>/dev/null || true
           docker rm   checkmesa 2>/dev/null || true
 

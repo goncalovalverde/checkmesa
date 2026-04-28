@@ -36,6 +36,11 @@ RUN addgroup --system --gid 1001 nodejs && \
 # libssl1.1 is not in Alpine by default; install it before copying engines.
 RUN apk add --no-cache openssl
 
+# Pre-create the SQLite data directory with correct ownership.
+# For new named volumes Docker copies this directory (including ownership)
+# into the volume on first mount, so nextjs can write the database file.
+RUN mkdir -p /data && chown nextjs:nodejs /data
+
 # Copy public assets and standalone output
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

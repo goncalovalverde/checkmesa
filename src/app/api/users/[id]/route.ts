@@ -33,7 +33,7 @@ export async function DELETE(_: NextRequest, { params }: Params) {
   const auth = await requireRole("ADMIN");
   if (!auth.ok) return auth.response;
 
-  const requestingUserId = (auth.session.user as { id?: string }).id;
+  const requestingUserId = auth.session.user.id;
   if (id === requestingUserId) {
     return NextResponse.json({ error: "Não é possível eliminar a sua própria conta" }, { status: 400 });
   }

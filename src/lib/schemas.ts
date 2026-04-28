@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
+import { ROLES } from "./roles";
 
 export function validationError(error: z.ZodError) {
   return NextResponse.json({ error: error.flatten() }, { status: 422 });
@@ -10,14 +11,14 @@ export const CreateUserSchema = z.object({
   name:     z.string().min(1).max(100).trim(),
   email:    z.string().email().max(255),
   password: z.string().min(8).max(128),
-  role:     z.enum(["ADMIN", "STAFF"]).default("STAFF"),
+  role:     z.enum(ROLES).default("STAFF"),
 }).strict();
 
 export const PatchUserSchema = z.object({
   name:     z.string().min(1).max(100).trim().optional(),
   email:    z.string().email().max(255).optional(),
   password: z.string().min(8).max(128).optional(),
-  role:     z.enum(["ADMIN", "STAFF"]).optional(),
+  role:     z.enum(ROLES).optional(),
 }).strict();
 
 // Tables

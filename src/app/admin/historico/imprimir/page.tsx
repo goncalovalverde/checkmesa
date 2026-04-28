@@ -30,8 +30,7 @@ export default async function ImprimirPage({
   searchParams: Promise<SearchParams>;
 }) {
   const session = await getServerSession(authOptions);
-  const role = (session?.user as { role?: string })?.role;
-  if (!session || role !== "ADMIN") redirect("/sala");
+  if (!session || session?.user.role !== "ADMIN") redirect("/sala");
 
   const { from, to } = await searchParams;
 

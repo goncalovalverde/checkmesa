@@ -82,7 +82,7 @@ export default function SalaPage() {
         <span className="app-bar-title" style={{ color: "var(--brand)" }}>CheckMesa</span>
         <div style={{ display: "flex", alignItems: "center", gap: "var(--s3)" }}>
           <span style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>{session?.user?.name}</span>
-          {(session?.user as { role?: string })?.role === "ADMIN" && (
+          {session?.user.role === "ADMIN" && (
             <button onClick={() => router.push("/admin")} className="btn btn-outline" style={{ minHeight: "var(--touch-sm)", padding: "0 var(--s3)", fontSize: "var(--text-sm)" }}>
               Admin
             </button>

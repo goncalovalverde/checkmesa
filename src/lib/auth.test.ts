@@ -94,7 +94,7 @@ describe("auth — session callback", () => {
   it("maps token sub and role onto session.user", () => {
     const token: JWT = { sub: "user-1", role: "ADMIN" };
     const session: Session = {
-      user: { name: "Alice", email: "a@b.com", id: "", role: "" },
+      user: { name: "Alice", email: "a@b.com", id: "", role: "STAFF" },
       expires: "2099-01-01",
     };
     const result = sessionCallback({ session, token });

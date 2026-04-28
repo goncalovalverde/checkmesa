@@ -2,8 +2,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import type { Session } from "next-auth";
 import { authOptions } from "./auth";
-
-type Role = "ADMIN" | "STAFF";
+import type { Role } from "./roles";
 
 type AuthOk = { ok: true; session: Session };
 type AuthErr = { ok: false; response: NextResponse };
@@ -21,7 +20,7 @@ export async function requireAuth(): Promise<AuthResult> {
 /** Requires a valid session with a specific role. Returns 403 if not authenticated or wrong role. */
 export async function requireRole(role: Role): Promise<AuthResult> {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as { role?: string }).role !== role) {
+  if (!session || session.user.role !== role) {
     return { ok: false, response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
   }
   return { ok: true, session };

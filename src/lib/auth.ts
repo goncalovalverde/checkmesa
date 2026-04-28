@@ -2,6 +2,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
+import { ROLES, type Role } from "./roles";
 
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 const MAX_ATTEMPTS = 10;
@@ -44,20 +45,24 @@ export const authOptions: NextAuthOptions = {
         const valid = await bcrypt.compare(credentials.password, user.password);
         if (!valid) return null;
 
-        return { id: user.id, name: user.name, email: user.email, role: user.role };
+        if (!(ROLES as readonly string[]).includes(user.role)) {
+          console.error(`Invalid role in DB for user ${user.id}: ${user.role}`);
+          return null;
+        }
+        return { id: user.id, name: user.name, email: user.email, role: user.role as Role };
       },
     }),
   ],
   session: { strategy: "jwt", maxAge: 8 * 60 * 60 }, // 8-hour shift expiry
   callbacks: {
     jwt({ token, user }) {
-      if (user) token.role = (user as { role: string }).role;
+      if (user) token.role = (user as { role: Role }).role;
       return token;
     },
     session({ session, token }) {
       if (session.user) {
-        (session.user as { id?: string; role?: string }).id = token.sub;
-        (session.user as { id?: string; role?: string }).role = token.role as string;
+        session.user.id = token.sub!;
+        session.user.role = token.role;
       }
       return session;
     },

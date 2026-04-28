@@ -3,19 +3,7 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { IvaBreakdown } from "@/components/sala/consulta/IvaBreakdown";
 import { SplitByPerson } from "@/components/sala/consulta/SplitByPerson";
-
-interface Product {
-  id: string; name: string; category: string;
-  finalPrice: number; basePrice: number; vatAmount: number; vatRate: number; active: boolean;
-}
-interface OrderItem {
-  id: string; sessionId: string; productId: string; quantity: number; unitPrice: number; product: Product;
-}
-interface TableSession {
-  id: string; tableId: string; consumers: number; status: "OPEN" | "CLOSED";
-  table: { id: string; name: string; capacity: number; status: "FREE" | "OCCUPIED" };
-  orderItems: OrderItem[];
-}
+import type { TableSession } from "@/types/sala";
 
 export default function ConsultaPage({ params }: { params: Promise<{ tableId: string }> }) {
   const { tableId } = use(params);

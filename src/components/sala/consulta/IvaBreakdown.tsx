@@ -1,13 +1,5 @@
 "use client";
-
-interface OrderItem {
-  id: string;
-  quantity: number;
-  unitPrice: number;
-  product: {
-    vatRate: number;
-  };
-}
+import type { OrderItem } from "@/types/sala";
 
 interface Props {
   orderItems: OrderItem[];

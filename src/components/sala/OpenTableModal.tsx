@@ -2,13 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ModalShell } from "@/components/ModalShell";
-
-interface Table {
-  id: string;
-  name: string;
-  capacity: number;
-  status: "FREE" | "OCCUPIED";
-}
+import type { Table } from "@/types/sala";
 
 interface Props {
   table: Table;

@@ -4,13 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { OpenTableModal } from "@/components/sala/OpenTableModal";
 import { ROUTES } from "@/lib/routes";
-
-interface Table {
-  id: string;
-  name: string;
-  capacity: number;
-  status: "FREE" | "OCCUPIED";
-}
+import type { Table } from "@/types/sala";
 
 export default function SalaPage() {
   const { data: session, status } = useSession();

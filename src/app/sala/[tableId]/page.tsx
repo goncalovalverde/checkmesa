@@ -3,20 +3,7 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { OrderItemRow } from "@/components/sala/OrderItemRow";
 import { ProductGrid } from "@/components/sala/ProductGrid";
-
-interface Product {
-  id: string; name: string; category: string;
-  finalPrice: number; basePrice: number; vatAmount: number; vatRate: number; active: boolean;
-}
-interface OrderItem {
-  id: string; sessionId: string; productId: string; quantity: number; unitPrice: number; product: Product;
-}
-interface Table { id: string; name: string; capacity: number; status: "FREE" | "OCCUPIED"; }
-interface TableSession {
-  id: string; tableId: string; openedBy: string; consumers: number;
-  status: "OPEN" | "CLOSED"; openedAt: string; closedAt: string | null;
-  table: Table; orderItems: OrderItem[];
-}
+import type { Product, OrderItem, Table, TableSession } from "@/types/sala";
 
 export default function TablePage({ params }: { params: Promise<{ tableId: string }> }) {
   const { tableId } = use(params);

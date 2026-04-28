@@ -1,22 +1,5 @@
 "use client";
-
-interface OrderItem {
-  id: string;
-  sessionId: string;
-  productId: string;
-  quantity: number;
-  unitPrice: number;
-  product: {
-    id: string;
-    name: string;
-    category: string;
-    finalPrice: number;
-    basePrice: number;
-    vatAmount: number;
-    vatRate: number;
-    active: boolean;
-  };
-}
+import type { OrderItem } from "@/types/sala";
 
 interface Props {
   item: OrderItem;

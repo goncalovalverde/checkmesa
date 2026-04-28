@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import type { Product } from "@/types/sala";
 
 const CATEGORIES = [
   { label: "Entradas",    emoji: "🥗" },
@@ -7,17 +8,6 @@ const CATEGORIES = [
   { label: "Bebidas",     emoji: "🥤" },
   { label: "Sobremesas",  emoji: "🍮" },
 ];
-
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  finalPrice: number;
-  basePrice: number;
-  vatAmount: number;
-  vatRate: number;
-  active: boolean;
-}
 
 interface Props {
   products: Product[];

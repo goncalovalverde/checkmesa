@@ -61,7 +61,7 @@ jobs:
             echo "## 🔒 npm audit (production)"
             echo ""
             if [ "$TOTAL" -eq 0 ]; then
-              echo "✅ No vulnerabilities found."
+              echo "✅ **No vulnerabilities found.**"
             else
               jq -r '"**\(.metadata.vulnerabilities.total) vulnerabilities** — 🔴 critical: \(.metadata.vulnerabilities.critical) · 🟠 high: \(.metadata.vulnerabilities.high) · 🟡 moderate: \(.metadata.vulnerabilities.moderate) · 🔵 low: \(.metadata.vulnerabilities.low)"' "$AUDIT_FILE"
               echo ""
@@ -72,6 +72,12 @@ jobs:
                 ($v.via[] | select(type == "object")) |
                 "| \($v.severity) | `\($v.name)` | \(.title // "-") | [\(.url | split("/")[-1])](\(.url)) |"
               ' "$AUDIT_FILE"
+              echo ""
+              if [ "$((HIGH + CRIT))" -gt 0 ]; then
+                echo "❌ **Deploy blocked — $CRIT critical and $HIGH high severity vulnerabilities must be resolved.**"
+              else
+                echo "✅ **No high or critical vulnerabilities — deploy unblocked.**"
+              fi
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 

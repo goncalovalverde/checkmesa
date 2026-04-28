@@ -161,8 +161,19 @@ export default function ConsultaPage({ params }: { params: Promise<{ tableId: st
       </div>
 
       {/* Bottom bar */}
-      <div className="bottom-bar">
-        <button onClick={handleClose} disabled={closing} className="btn btn-primary btn-w100 btn-lg">
+      <div className="bottom-bar" style={{ display: "flex", gap: "var(--s3)" }}>
+        {session && (
+          <a
+            href={`/recibo/${session.id}`}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-ghost btn-lg"
+            style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: "var(--s1)", whiteSpace: "nowrap" }}
+          >
+            🧾 Recibo
+          </a>
+        )}
+        <button onClick={handleClose} disabled={closing} className="btn btn-primary btn-lg" style={{ flex: 1 }}>
           {closing ? "A fechar…" : "Fechar Mesa"}
         </button>
       </div>

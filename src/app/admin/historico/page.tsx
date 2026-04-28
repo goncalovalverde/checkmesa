@@ -356,6 +356,19 @@ export default function HistoricoPage() {
                                         <td colSpan={4} style={{ padding: "var(--s2) var(--s2)", textAlign: "right", fontWeight: 600, color: "var(--text-secondary)" }}>Total</td>
                                         <td style={{ padding: "var(--s2) var(--s2)", textAlign: "right", fontWeight: 700, color: "var(--brand-dark)" }}>€{s.total.toFixed(2)}</td>
                                       </tr>
+                                      <tr>
+                                        <td colSpan={5} style={{ padding: "var(--s1) var(--s2)", textAlign: "right", borderTop: "none" }}>
+                                          <a
+                                            href={`/recibo/${s.id}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="btn btn-ghost"
+                                            style={{ fontSize: "var(--text-sm)", padding: "0 var(--s3)", minHeight: "var(--touch-sm)", display: "inline-flex", alignItems: "center", gap: "var(--s1)" }}
+                                          >
+                                            🧾 Recibo
+                                          </a>
+                                        </td>
+                                      </tr>
                                     </tfoot>
                                   </table>
                                 </div>

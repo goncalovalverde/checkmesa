@@ -124,6 +124,18 @@ docker compose up --build
 A aplicação fica disponível em `http://localhost:3000`.  
 O ficheiro SQLite é persistido em volume Docker: `./prisma/dev.db`.
 
+## Diagramas UML
+
+| Diagrama | Tipo | Ficheiro |
+|---|---|---|
+| Arquitectura de Componentes | Component | [docs/diagrams/component.md](docs/diagrams/component.md) |
+| Modelo de Dados | ER Diagram | [docs/diagrams/data-model.md](docs/diagrams/data-model.md) |
+| Fluxo de Autenticação | Sequence | [docs/diagrams/auth-sequence.md](docs/diagrams/auth-sequence.md) |
+| Ciclo de Vida de Pedido | Sequence | [docs/diagrams/order-lifecycle-sequence.md](docs/diagrams/order-lifecycle-sequence.md) |
+| Estados de Mesa / Sessão | State Machine | [docs/diagrams/state-machines.md](docs/diagrams/state-machines.md) |
+
+> Todos os diagramas estão em sintaxe **Mermaid.js** e renderizam nativamente no GitHub, GitLab e VS Code.
+
 ## Decisões de Arquitectura
 
 | ADR | Título | Estado |

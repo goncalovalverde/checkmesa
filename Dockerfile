@@ -47,6 +47,6 @@ USER nextjs
 
 EXPOSE 3000
 
-# Run migrations and start the app
-# The DATABASE_URL volume mount provides the real path
-CMD sh -c "npx prisma migrate deploy && node server.js"
+# Run migrations then start the app.
+# Use `node` directly — node_modules/.bin/ is not copied to the runner stage.
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node server.js"]

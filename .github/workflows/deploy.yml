@@ -1,16 +1,15 @@
-# Runs the test suite on every push/PR to main.
-# Deploys to the Orange Pi via SSH only when tests pass on a push to main.
+# Runs the test suite on every push/PR to main (GitHub-hosted runner).
+# Deploys on the Orange Pi self-hosted runner when tests pass on a push to main.
 #
-# Required GitHub repository secrets:
-#   DEPLOY_HOST      — Orange Pi IP address or hostname
-#   DEPLOY_USER      — SSH username (e.g. orangepi)
-#   DEPLOY_SSH_KEY   — Ed25519 private key (the matching public key must be in
-#                      ~/.ssh/authorized_keys on the device)
+# Required GitHub repository secret (Settings → Secrets → Actions):
+#   NEXTAUTH_SECRET  — random 32-char secret for NextAuth session signing
 #
 # One-time setup on the Orange Pi (see README § Deployment):
-#   1. Clone the repo to /opt/checkmesa
-#   2. Create /opt/checkmesa/.env with NEXTAUTH_SECRET and NEXTAUTH_URL
-#   3. Ensure the deploy user can run `docker` without sudo
+#   1. Install and register the GitHub Actions self-hosted runner
+#      (Settings → Actions → Runners → New self-hosted runner)
+#   2. Add runner labels: self-hosted, linux, arm64
+#   3. Ensure the runner OS user is in the `docker` group:
+#      sudo usermod -aG docker $USER
 
 name: CI / Deploy
 
@@ -21,7 +20,7 @@ on:
     branches: [main]
 
 jobs:
-  # ── Job 1: Test ─────────────────────────────────────────────────────────────
+  # ── Job 1: Test (GitHub-hosted) ─────────────────────────────────────────────
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -41,60 +40,58 @@ jobs:
       - name: Run test suite
         run: npm test -- --passWithNoTests
 
-  # ── Job 2: Deploy ───────────────────────────────────────────────────────────
+  # ── Job 2: Deploy (self-hosted Orange Pi) ───────────────────────────────────
   deploy:
-    name: Deploy to Orange Pi
+    name: Deploy on Orange Pi
     needs: test
     # Only deploy on direct pushes to main (not on pull requests)
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, arm64]
     environment: production
 
     steps:
-      - name: SSH → pull, build, restart
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          port: 22
-          # Script runs on the Orange Pi.
-          # Secrets (NEXTAUTH_SECRET, NEXTAUTH_URL) are stored in
-          # /opt/checkmesa/.env on the device — never sent over the wire.
-          script: |
-            set -euo pipefail
-            APP_DIR="/opt/checkmesa"
+      - uses: actions/checkout@v4
 
-            echo "── [1/4] Pull latest code ──────────────────────────────"
-            cd "$APP_DIR"
-            git pull origin main
+      - name: Build Docker image
+        run: docker build -t checkmesa:latest .
 
-            echo "── [2/4] Build image ────────────────────────────────────"
-            docker build -t checkmesa:latest .
+      - name: Swap container
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+        run: |
+          set -euo pipefail
 
-            echo "── [3/4] Swap container ─────────────────────────────────"
-            docker stop checkmesa 2>/dev/null || true
-            docker rm   checkmesa 2>/dev/null || true
+          # Write secrets to a temp file so they are never exposed in ps aux
+          printf 'NEXTAUTH_SECRET=%s\nNEXTAUTH_URL=%s\n' \
+            "$NEXTAUTH_SECRET" \
+            "https://checkmesa.instavel.org" > /tmp/checkmesa.env
 
-            docker run -d \
-              --name checkmesa \
-              --restart unless-stopped \
-              -p 3000:3000 \
-              -v checkmesa-db:/data \
-              --env-file "$APP_DIR/.env" \
-              -e DATABASE_URL="file:/data/dev.db" \
-              checkmesa:latest
+          docker stop checkmesa 2>/dev/null || true
+          docker rm   checkmesa 2>/dev/null || true
 
-            echo "── [4/4] Health check ───────────────────────────────────"
-            for i in 1 2 3 4 5; do
-              sleep 5
-              STATUS=$(curl -sf http://localhost:3000/api/health | grep -o '"status":"ok"' || true)
-              if [ -n "$STATUS" ]; then
-                echo "✓ Health check passed (attempt $i)"
-                exit 0
-              fi
-              echo "  attempt $i — not ready yet"
-            done
-            echo "✗ Health check failed after 25s"
-            docker logs --tail 50 checkmesa || true
-            exit 1
+          docker run -d \
+            --name checkmesa \
+            --restart unless-stopped \
+            -p 3000:3000 \
+            -v checkmesa-db:/data \
+            -e DATABASE_URL="file:/data/dev.db" \
+            --env-file /tmp/checkmesa.env \
+            checkmesa:latest
+
+          rm -f /tmp/checkmesa.env
+
+      - name: Health check
+        run: |
+          for i in 1 2 3 4 5; do
+            sleep 5
+            STATUS=$(curl -sf http://localhost:3000/api/health | grep -o '"status":"ok"' || true)
+            if [ -n "$STATUS" ]; then
+              echo "✓ Health check passed (attempt $i)"
+              exit 0
+            fi
+            echo "  attempt $i — not ready yet"
+          done
+          echo "✗ Health check failed after 25s"
+          docker logs --tail 50 checkmesa || true
+          exit 1
+

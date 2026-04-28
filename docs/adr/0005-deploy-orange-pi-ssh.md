@@ -1,4 +1,4 @@
-# ADR-0005: Deployment — Orange Pi via SSH Build
+# ADR-0005: Deployment — Orange Pi Self-Hosted Runner
 
 **Data:** 2026-04-28  
 **Estado:** Aceite  
@@ -8,12 +8,12 @@
 
 ## Contexto
 
-O CheckMesa destina-se a correr num único dispositivo de baixo custo na rede local do restaurante (Orange Pi 5). É necessário um pipeline de CI/CD que:
+O CheckMesa destina-se a correr num único dispositivo de baixo custo na rede local do restaurante (Orange Pi). É necessário um pipeline de CI/CD que:
 
 - Garanta que os testes passam antes de qualquer deploy
 - Entregue novas versões sem intervenção manual
 - Não exija uma cloud registry ou infraestrutura adicional
-- Seja seguro — segredos de produção nunca em transit entre CI e o dispositivo
+- Seja seguro — segredos de produção geridos pelo GitHub, nunca hardcoded
 
 O Orange Pi corre arquitectura **ARM64**. Os runners standard do GitHub Actions são **x86-64**, o que torna impraticável construir a imagem no CI e transferi-la para o dispositivo sem QEMU ou um registry multi-arch.
 
@@ -21,12 +21,12 @@ O Orange Pi corre arquitectura **ARM64**. Os runners standard do GitHub Actions 
 
 ## Decisão
 
-Adoptar a estratégia **SSH Build-on-Device**:
+Adoptar a estratégia **Self-Hosted Runner no Orange Pi**:
 
-1. O GitHub Actions SSHa para o Orange Pi usando uma chave Ed25519 dedicada.
-2. O script remoto faz `git pull origin main`, `docker build`, e reinicia o container.
-3. Os segredos de produção (`NEXTAUTH_SECRET`, `NEXTAUTH_URL`) são armazenados num ficheiro `/opt/checkmesa/.env` **no próprio dispositivo** — nunca saem da rede local.
-4. A `DATABASE_URL` não é sensível e é passada directamente como argumento `-e`.
+1. O Orange Pi corre um GitHub Actions runner com as labels `self-hosted, linux, arm64`.
+2. A cada push em `main`, o runner faz checkout do repositório, constrói a imagem Docker nativamente em ARM64, e reinicia o container.
+3. O `NEXTAUTH_SECRET` é armazenado como GitHub Secret e injectado no container via ficheiro `.env` temporário (evita exposição em `ps aux`).
+4. O `NEXTAUTH_URL` é um valor não-sensível hardcoded no workflow.
 
 ---
 
@@ -34,10 +34,9 @@ Adoptar a estratégia **SSH Build-on-Device**:
 
 | Alternativa | Razão para rejeição |
 |---|---|
+| SSH deploy (pull + build no device) | Requer 3 secrets adicionais (host, user, key); mais superfície de ataque |
 | Build no CI + push para GHCR + pull no device | Requer QEMU para emulação ARM64 (lento, ~15 min); ou runner ARM pago |
 | `docker compose` no deploy | Mais complexo sem ganho; o `docker run` cobre o caso de uso |
-| Self-hosted runner no Orange Pi | Expõe o dispositivo a execução de código arbitrário do CI; superfície de ataque maior |
-| Ansible / Capistrano | Overhead de tooling desnecessário para um único host |
 
 ---
 
@@ -45,13 +44,13 @@ Adoptar a estratégia **SSH Build-on-Device**:
 
 **Positivas:**
 - Zero problemas de arquitectura — a imagem é construída nativamente em ARM64
-- Segredos de produção nunca transitam fora da LAN
-- Pipeline simples (< 80 linhas de YAML)
+- Apenas 1 GitHub Secret necessário (`NEXTAUTH_SECRET`)
+- Pipeline simples e legível (< 80 linhas de YAML)
+- Sem dependência de ferramentas externas (sem `appleboy/ssh-action`)
 
 **Negativas / Riscos:**
-- O tempo de build depende da performance do Orange Pi (~3-5 min para build frio)
-- Se o dispositivo estiver offline, o deploy falha (aceitável — é uma instalação local)
-- Um único ponto de falha de hardware (mitigação: backup do volume `checkmesa-db`)
+- O runner deve estar online para o deploy funcionar (aceitável — instalação local)
+- O runner executa código do repositório directamente no device — mitigação: só `main` despoleta o deploy, com aprovação opcional via `environment: production`
 
 ---
 
@@ -59,32 +58,16 @@ Adoptar a estratégia **SSH Build-on-Device**:
 
 ### No Orange Pi
 ```bash
-# 1. Clonar o repositório
-sudo mkdir -p /opt/checkmesa
-sudo chown $USER /opt/checkmesa
-git clone <repo-url> /opt/checkmesa
+# 1. Instalar e registar o runner
+#    GitHub → Settings → Actions → Runners → New self-hosted runner
+#    Seguir as instruções; adicionar labels: self-hosted, linux, arm64
 
-# 2. Criar ficheiro de segredos
-cat > /opt/checkmesa/.env <<EOF
-NEXTAUTH_SECRET=<segredo-aleatório-32-chars>
-NEXTAUTH_URL=https://checkmesa.instavel.org
-EOF
-chmod 600 /opt/checkmesa/.env
-
-# 3. Autorizar a chave SSH do CI
-echo "<chave-pública-ed25519>" >> ~/.ssh/authorized_keys
+# 2. Permitir docker sem sudo
+sudo usermod -aG docker $USER
 ```
 
 ### No GitHub (Settings → Secrets → Actions)
 | Secret | Valor |
 |---|---|
-| `DEPLOY_HOST` | IP ou hostname do Orange Pi |
-| `DEPLOY_USER` | Utilizador SSH (ex: `orangepi`) |
-| `DEPLOY_SSH_KEY` | Chave privada Ed25519 |
+| `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
 
-### Gerar par de chaves dedicado
-```bash
-ssh-keygen -t ed25519 -C "checkmesa-deploy" -f ~/.ssh/checkmesa_deploy -N ""
-# Chave privada → DEPLOY_SSH_KEY (GitHub Secret)
-# Chave pública → authorized_keys no Orange Pi
-```

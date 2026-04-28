@@ -43,7 +43,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="input"
-              placeholder="admin@checkmesa.pt"
+              placeholder="email@exemplo.pt"
             />
           </div>
           <div className="field">
@@ -67,16 +67,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div style={{
-          marginTop: "var(--s5)",
-          padding: "var(--s3) var(--s4)",
-          background: "var(--bg-warm)",
-          borderRadius: "var(--r-md)",
-          fontSize: "var(--text-xs)",
-          color: "var(--text-secondary)",
-        }}>
-          <strong>Dev:</strong> admin@checkmesa.pt / admin123
-        </div>
       </div>
     </div>
   );

@@ -63,9 +63,11 @@ checkmesa/
 │           └── order-items/
 ├── src/components/
 ├── src/lib/
-│   ├── prisma.ts     # Singleton Prisma client
-│   ├── auth.ts       # NextAuth config
-│   └── vat.ts        # Cálculo IVA
+│   ├── prisma.ts       # Singleton Prisma client
+│   ├── auth.ts         # NextAuth config + login rate limiter
+│   ├── auth-guard.ts   # requireAuth / requireRole API guard
+│   ├── schemas.ts      # Zod validation schemas (all routes)
+│   └── vat.ts          # Cálculo IVA
 ├── middleware.ts     # Protecção de rotas
 ├── Dockerfile
 ├── docker-compose.yml
@@ -113,3 +115,6 @@ O ficheiro SQLite é persistido em volume Docker: `./prisma/dev.db`.
 | ADR | Título | Estado |
 |---|---|---|
 | [0001](docs/adr/0001-stack-selection.md) | Stack Selection | Aceite |
+| [0002](docs/adr/0002-prisma-v5-downgrade.md) | Prisma v5 Downgrade | Aceite |
+| [0003](docs/adr/0003-test-suite.md) | Test Suite (Jest + RTL) | Aceite |
+| [0004](docs/adr/0004-auth-guard-centralisation.md) | Centralised Auth Guard | Aceite |

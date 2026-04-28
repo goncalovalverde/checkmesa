@@ -27,7 +27,9 @@ graph TD
         end
 
         subgraph Lib["src/lib"]
-            Auth["auth.ts\nNextAuth config"]
+            Auth["auth.ts\nNextAuth config + rate limiter"]
+            AuthGuard["auth-guard.ts\nrequireAuth / requireRole"]
+            Schemas["schemas.ts\nZod validation schemas"]
             Prisma["prisma.ts\nPrismaClient singleton"]
             VAT["vat.ts\nVAT calculator"]
         end
@@ -42,6 +44,9 @@ graph TD
     Middleware --> Auth
     API_Auth --> Auth
     Auth --> Prisma
+    API --> AuthGuard
+    AuthGuard --> Auth
+    API --> Schemas
     API --> Prisma
     API --> VAT
     Prisma --> SQLite

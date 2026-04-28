@@ -1,9 +1,12 @@
 // docker-seed.js — run inside the production container on first deploy only.
-// Invoked by the CI workflow via: docker cp + docker exec node /tmp/docker-seed.js
+// Invoked by the CI workflow via: docker cp + docker exec node /app/docker-seed.js
 //
-// Idempotency: exits immediately if ANY user exists (= not a fresh install).
-// All-or-nothing: all data is created in a single transaction so a partial
-// failure leaves the DB empty and re-runnable on the next deploy.
+// Idempotency: every write uses upsert keyed on a stable unique field so the
+// script is safe to re-run against any partial state (e.g. a previous run that
+// crashed mid-transaction, or the legacy inline seed that ran without a transaction).
+//
+// Requires in runner image (must have matching COPY lines in Dockerfile):
+//   @prisma/client, bcryptjs
 
 "use strict";
 
@@ -61,7 +64,7 @@ async function main() {
     process.exit(1);
   }
 
-  // Fresh-install guard — skip entirely if any user already exists.
+  // Fresh-install guard — skip entirely if the admin user already exists.
   const userCount = await prisma.user.count();
   if (userCount > 0) {
     console.log("✓ Database already seeded — skipping");
@@ -72,34 +75,50 @@ async function main() {
   const adminHash = await bcrypt.hash(adminPassword, 12);
 
   await prisma.$transaction(async (tx) => {
-    await tx.user.create({
-      data: {
-        name: "Administrador",
-        email: "admin@checkmesa.pt",
+    await tx.user.upsert({
+      where:  { email: "admin@checkmesa.pt" },
+      update: {},
+      create: {
+        name:     "Administrador",
+        email:    "admin@checkmesa.pt",
         password: adminHash,
-        role: "ADMIN",
+        role:     "ADMIN",
       },
     });
 
     for (const vr of VAT_RATES) {
-      await tx.vatRate.create({ data: vr });
+      await tx.vatRate.upsert({
+        where:  { label: vr.label },
+        update: { id: vr.id, rate: vr.rate },
+        create: vr,
+      });
     }
 
     // Build a name→id map so products can reference their category.
     const categoryMap = {};
     for (const cat of CATEGORIES) {
-      const created = await tx.category.create({ data: cat });
-      categoryMap[cat.name] = created.id;
+      const record = await tx.category.upsert({
+        where:  { name: cat.name },
+        update: { vatRateId: cat.vatRateId },
+        create: cat,
+      });
+      categoryMap[cat.name] = record.id;
     }
 
     for (const name of TABLES) {
-      await tx.table.create({ data: { name, capacity: 4 } });
+      await tx.table.upsert({
+        where:  { name },
+        update: {},
+        create: { name, capacity: 4 },
+      });
     }
 
     for (const p of PRODUCTS) {
       const { basePrice, vatAmount } = calcVat(p.finalPrice, p.vatRate);
-      await tx.product.create({
-        data: {
+      await tx.product.upsert({
+        where:  { name: p.name },
+        update: { finalPrice: p.finalPrice, basePrice, vatAmount, vatRate: p.vatRate },
+        create: {
           name:       p.name,
           categoryId: categoryMap[p.category],
           finalPrice: p.finalPrice,

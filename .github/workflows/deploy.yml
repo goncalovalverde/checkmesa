@@ -121,9 +121,8 @@ jobs:
             exit 0
           fi
 
-          # Copy the seed script into the container and run it.
-          # The script is idempotent: skips if any user already exists (fresh-install only).
-          docker cp scripts/docker-seed.js checkmesa:/tmp/docker-seed.js
+          # Copy into /app so Node resolves require('@prisma/client') from /app/node_modules.
+          docker cp scripts/docker-seed.js checkmesa:/app/docker-seed.js
           docker exec \
             -e SEED_ADMIN_PASSWORD="$SEED_ADMIN_PASSWORD" \
-            checkmesa node /tmp/docker-seed.js
+            checkmesa node /app/docker-seed.js

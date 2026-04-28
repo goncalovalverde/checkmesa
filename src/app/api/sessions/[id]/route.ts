@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { PatchSessionSchema, validationError } from "@/lib/schemas";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -28,22 +29,30 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await req.json();
+  const parsed = PatchSessionSchema.safeParse(await req.json());
+  if (!parsed.success) return validationError(parsed.error);
 
-  if (body.status === "CLOSED") {
-    const tableSession = await prisma.tableSession.findUnique({ where: { id } });
-    if (!tableSession) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const tableSession = await prisma.tableSession.findUnique({ where: { id } });
+  if (!tableSession) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  if (parsed.data.status === "CLOSED") {
+    if (tableSession.status === "CLOSED") {
+      return NextResponse.json({ error: "Session already closed" }, { status: 409 });
+    }
     const [updated] = await prisma.$transaction([
-      prisma.tableSession.update({
-        where: { id },
-        data: { status: "CLOSED", closedAt: new Date() },
-      }),
+      prisma.tableSession.update({ where: { id }, data: { status: "CLOSED", closedAt: new Date() } }),
       prisma.table.update({ where: { id: tableSession.tableId }, data: { status: "FREE" } }),
     ]);
     return NextResponse.json(updated);
   }
 
-  const updated = await prisma.tableSession.update({ where: { id }, data: body });
+  if (tableSession.status === "CLOSED") {
+    return NextResponse.json({ error: "Cannot modify a closed session" }, { status: 409 });
+  }
+
+  const updated = await prisma.tableSession.update({
+    where: { id },
+    data: { ...(parsed.data.consumers !== undefined ? { consumers: parsed.data.consumers } : {}) },
+  });
   return NextResponse.json(updated);
 }

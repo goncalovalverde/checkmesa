@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { PatchUserSchema, validationError } from "@/lib/schemas";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -13,13 +14,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = await req.json();
-  const updateData: Record<string, unknown> = { ...body };
+  const parsed = PatchUserSchema.safeParse(await req.json());
+  if (!parsed.success) return validationError(parsed.error);
+  const { password, ...rest } = parsed.data;
 
-  if (body.password) {
-    updateData.password = await bcrypt.hash(body.password, 12);
+  const updateData: Record<string, unknown> = { ...rest };
+  if (password) {
+    updateData.password = await bcrypt.hash(password, 12);
   }
-  delete updateData.password_raw;
 
   const user = await prisma.user.update({
     where: { id },

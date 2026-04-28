@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { CreateTableSchema, validationError } from "@/lib/schemas";
+import { CreateVatRateSchema, validationError } from "@/lib/schemas";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const tables = await prisma.table.findMany({ orderBy: { name: "asc" } });
-  return NextResponse.json(tables);
+  const vatRates = await prisma.vatRate.findMany({ orderBy: { rate: "asc" } });
+  return NextResponse.json(vatRates);
 }
 
 export async function POST(req: NextRequest) {
@@ -18,10 +18,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const parsed = CreateTableSchema.safeParse(await req.json());
+  const parsed = CreateVatRateSchema.safeParse(await req.json());
   if (!parsed.success) return validationError(parsed.error);
-  const { name, capacity } = parsed.data;
+  const { label, rate } = parsed.data;
 
-  const table = await prisma.table.create({ data: { name, capacity } });
-  return NextResponse.json(table, { status: 201 });
+  try {
+    const vatRate = await prisma.vatRate.create({
+      data: { label, rate },
+    });
+    return NextResponse.json(vatRate, { status: 201 });
+  } catch {
+    return NextResponse.json({ error: "Designação já existe" }, { status: 409 });
+  }
 }

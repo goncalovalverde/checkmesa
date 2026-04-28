@@ -11,6 +11,9 @@ jest.mock("@/lib/prisma", () => ({
       findMany: jest.fn(),
       create: jest.fn(),
     },
+    category: {
+      findUnique: jest.fn(),
+    },
   },
 }));
 
@@ -44,9 +47,9 @@ describe("GET /api/products", () => {
     (getServerSession as jest.Mock).mockResolvedValue(mockSession);
     const dbProducts = [
       {
-        id: "p1", name: "Bife", type: "DISH", categoryId: "cat-1",
+        id: "p1", name: "Bife", categoryId: "cat-1",
         finalPrice: 12, basePrice: 10.62, vatAmount: 1.38, vatRate: 0.13, active: true,
-        category: { name: "Pratos" },
+        category: { name: "Pratos", vatRate: { id: "vr-intermedio", label: "Intermédio (13%)", rate: 0.13 } },
       },
     ];
     (prisma.product.findMany as jest.Mock).mockResolvedValue(dbProducts);
@@ -64,32 +67,43 @@ describe("POST /api/products", () => {
 
   it("returns 403 when user is not ADMIN", async () => {
     (getServerSession as jest.Mock).mockResolvedValue(mockStaffSession);
-    const res = await POST(postReq({ name: "X", type: "DISH", categoryId: "c1", finalPrice: 10 }));
+    const res = await POST(postReq({ name: "X", categoryId: "c1", finalPrice: 10 }));
     expect(res.status).toBe(403);
     expect(await res.json()).toEqual({ error: "Forbidden" });
   });
 
-  it("returns 400 when required fields are missing", async () => {
+  it("returns 422 when required fields are missing", async () => {
     (getServerSession as jest.Mock).mockResolvedValue(mockAdminSession);
     const res = await POST(postReq({ name: "Bife" }));
-    expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: "Missing fields" });
+    expect(res.status).toBe(422);
   });
 
-  it("returns 201 with created product and VAT applied", async () => {
+  it("returns 404 when category not found", async () => {
     (getServerSession as jest.Mock).mockResolvedValue(mockAdminSession);
+    (prisma.category.findUnique as jest.Mock).mockResolvedValue(null);
+    const res = await POST(postReq({ name: "Mousse", categoryId: "cat-missing", finalPrice: 4 }));
+    expect(res.status).toBe(404);
+  });
+
+  it("returns 201 with created product and VAT derived from category", async () => {
+    (getServerSession as jest.Mock).mockResolvedValue(mockAdminSession);
+    (prisma.category.findUnique as jest.Mock).mockResolvedValue({
+      id: "cat-2",
+      vatRate: { id: "vr-intermedio", label: "Intermédio (13%)", rate: 0.13 },
+    });
     const created = {
-      id: "p-new", name: "Mousse", type: "DISH", categoryId: "cat-2",
+      id: "p-new", name: "Mousse", categoryId: "cat-2",
       finalPrice: 4, basePrice: 3.54, vatAmount: 0.46, vatRate: 0.13, active: true,
       category: { name: "Sobremesas" },
     };
     (prisma.product.create as jest.Mock).mockResolvedValue(created);
 
-    const res = await POST(postReq({ name: "Mousse", type: "DISH", categoryId: "cat-2", finalPrice: 4 }));
+    const res = await POST(postReq({ name: "Mousse", categoryId: "cat-2", finalPrice: 4 }));
     expect(res.status).toBe(201);
     const body = await res.json();
     expect(body).toMatchObject({ id: "p-new", name: "Mousse", category: "Sobremesas" });
     const createCall = (prisma.product.create as jest.Mock).mock.calls[0][0].data;
     expect(createCall).toMatchObject({ name: "Mousse", vatRate: 0.13 });
+    expect(createCall).not.toHaveProperty("type");
   });
 });

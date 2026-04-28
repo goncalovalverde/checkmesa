@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { ExportQuerySchema } from "@/lib/schemas";
 
 function escapeCell(value: string | number | null | undefined): string {
   const str = String(value ?? "");
-  // Wrap in quotes if the value contains commas, quotes, or newlines
-  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-    return `"${str.replace(/"/g, '""')}"`;
+  const FORMULA_CHARS = ["=", "+", "-", "@", "\t", "\r"];
+  const safe = FORMULA_CHARS.some(c => str.startsWith(c)) ? `'${str}` : str;
+  if (safe.includes(",") || safe.includes('"') || safe.includes("\n")) {
+    return `"${safe.replace(/"/g, '""')}"`;
   }
-  return str;
+  return safe;
 }
 
 function formatDatePT(iso: string | null): string {
@@ -32,8 +34,14 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = req.nextUrl;
-  const from = searchParams.get("from");
-  const to = searchParams.get("to");
+  const queryParsed = ExportQuerySchema.safeParse({
+    from: searchParams.get("from") ?? undefined,
+    to:   searchParams.get("to") ?? undefined,
+  });
+  if (!queryParsed.success) {
+    return NextResponse.json({ error: "Parâmetros de data inválidos (formato: YYYY-MM-DD)" }, { status: 400 });
+  }
+  const { from, to } = queryParsed.data;
 
   const dateFilter =
     from || to
@@ -51,7 +59,7 @@ export async function GET(req: NextRequest) {
       table: { select: { name: true } },
       user: { select: { name: true } },
       orderItems: {
-        include: { product: { select: { name: true, type: true } } },
+        include: { product: { select: { name: true, category: { select: { name: true } } } } },
         orderBy: { addedAt: "asc" },
       },
     },
@@ -108,7 +116,7 @@ export async function GET(req: NextRequest) {
             escapeCell(s.consumers),
             escapeCell(sessionTotal.toFixed(2)),
             escapeCell(item.product.name),
-            escapeCell(item.product.type === "DRINK" ? "Bebida" : "Prato"),
+            escapeCell(item.product.category.name),
             escapeCell(item.quantity),
             escapeCell(item.unitPrice.toFixed(2)),
             escapeCell((item.quantity * item.unitPrice).toFixed(2)),
@@ -121,9 +129,10 @@ export async function GET(req: NextRequest) {
   // BOM prefix so Excel auto-detects UTF-8
   const csv = "\uFEFF" + rows.join("\r\n");
 
-  const fromLabel = from ?? "inicio";
-  const toLabel = to ?? "fim";
-  const filename = `checkmesa-historico-${fromLabel}-${toLabel}.csv`;
+  const sanitizeParam = (s: string) => s.replace(/[^a-zA-Z0-9\-_]/g, "").slice(0, 30);
+  const fromLabel = from ? sanitizeParam(from) : "inicio";
+  const toLabel   = to   ? sanitizeParam(to)   : "fim";
+  const filename  = `checkmesa-historico-${fromLabel}-${toLabel}.csv`;
 
   return new NextResponse(csv, {
     status: 200,

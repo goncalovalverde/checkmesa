@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateVat } from "@/lib/vat";
+import { CreateProductSchema, validationError } from "@/lib/schemas";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -10,7 +11,7 @@ export async function GET() {
 
   const products = await prisma.product.findMany({
     where: { active: true },
-    include: { category: true },
+    include: { category: { include: { vatRate: true } } },
     orderBy: [{ category: { name: "asc" } }, { name: "asc" }],
   });
 
@@ -27,14 +28,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { name, type, categoryId, finalPrice } = await req.json();
-  if (!name || !type || !categoryId || finalPrice == null) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-  }
+  const parsed = CreateProductSchema.safeParse(await req.json());
+  if (!parsed.success) return validationError(parsed.error);
+  const { name, categoryId, finalPrice } = parsed.data;
 
-  const vat = calculateVat(Number(finalPrice), type);
+  const category = await prisma.category.findUnique({
+    where: { id: categoryId },
+    include: { vatRate: true },
+  });
+  if (!category) return NextResponse.json({ error: "Categoria não encontrada" }, { status: 404 });
+
+  const vat = calculateVat(finalPrice, category.vatRate.rate);
   const product = await prisma.product.create({
-    data: { name, type, categoryId, ...vat },
+    data: { name, categoryId, ...vat },
     include: { category: true },
   });
 

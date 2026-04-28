@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { PatchTableSchema, validationError } from "@/lib/schemas";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -22,8 +23,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const data = await req.json();
-  const table = await prisma.table.update({ where: { id }, data });
+  const parsed = PatchTableSchema.safeParse(await req.json());
+  if (!parsed.success) return validationError(parsed.error);
+  const table = await prisma.table.update({ where: { id }, data: parsed.data });
   return NextResponse.json(table);
 }
 

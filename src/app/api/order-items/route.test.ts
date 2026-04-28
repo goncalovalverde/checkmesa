@@ -8,6 +8,7 @@ jest.mock("@/lib/auth", () => ({ authOptions: {} }));
 jest.mock("@/lib/prisma", () => ({
   prisma: {
     product: { findUnique: jest.fn() },
+    tableSession: { findUnique: jest.fn() },
     orderItem: {
       findFirst: jest.fn(),
       create: jest.fn(),
@@ -23,7 +24,7 @@ import { prisma } from "@/lib/prisma";
 const mockSession = { user: { id: "user-1", role: "STAFF" } };
 
 const mockProduct = {
-  id: "prod-1", name: "Água", type: "DRINK", category: "bebida",
+  id: "prod-1", name: "Água", category: "bebida",
   finalPrice: 1.5, basePrice: 1.22, vatAmount: 0.28, vatRate: 0.23, active: true,
 };
 
@@ -45,15 +46,23 @@ describe("POST /api/order-items", () => {
     expect(await res.json()).toEqual({ error: "Unauthorized" });
   });
 
-  it("returns 400 when sessionId or productId is missing", async () => {
+  it("returns 422 when sessionId or productId is missing", async () => {
     (getServerSession as jest.Mock).mockResolvedValue(mockSession);
     const res = await POST(postReq({ sessionId: "s1" }));
-    expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: "sessionId and productId required" });
+    expect(res.status).toBe(422);
+  });
+
+  it("returns 404 when session does not exist", async () => {
+    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
+    (prisma.tableSession.findUnique as jest.Mock).mockResolvedValue(null);
+    const res = await POST(postReq({ sessionId: "s1", productId: "prod-1" }));
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "Session not found" });
   });
 
   it("returns 404 when product does not exist", async () => {
     (getServerSession as jest.Mock).mockResolvedValue(mockSession);
+    (prisma.tableSession.findUnique as jest.Mock).mockResolvedValue({ status: "OPEN" });
     (prisma.product.findUnique as jest.Mock).mockResolvedValue(null);
     const res = await POST(postReq({ sessionId: "s1", productId: "missing" }));
     expect(res.status).toBe(404);
@@ -62,6 +71,7 @@ describe("POST /api/order-items", () => {
 
   it("creates a new order item (201) when product is not yet in session", async () => {
     (getServerSession as jest.Mock).mockResolvedValue(mockSession);
+    (prisma.tableSession.findUnique as jest.Mock).mockResolvedValue({ status: "OPEN" });
     (prisma.product.findUnique as jest.Mock).mockResolvedValue(mockProduct);
     (prisma.orderItem.findFirst as jest.Mock).mockResolvedValue(null);
     const created = { id: "oi-1", sessionId: "s1", productId: "prod-1", quantity: 1, unitPrice: 1.5, product: mockProduct };
@@ -78,6 +88,7 @@ describe("POST /api/order-items", () => {
 
   it("increments quantity (200) when product is already in the session", async () => {
     (getServerSession as jest.Mock).mockResolvedValue(mockSession);
+    (prisma.tableSession.findUnique as jest.Mock).mockResolvedValue({ status: "OPEN" });
     (prisma.product.findUnique as jest.Mock).mockResolvedValue(mockProduct);
     const existing = { id: "oi-1", sessionId: "s1", productId: "prod-1", quantity: 2 };
     (prisma.orderItem.findFirst as jest.Mock).mockResolvedValue(existing);

@@ -33,6 +33,11 @@ export async function DELETE(_: NextRequest, { params }: Params) {
   const auth = await requireRole("ADMIN");
   if (!auth.ok) return auth.response;
 
+  const requestingUserId = (auth.session.user as { id?: string }).id;
+  if (id === requestingUserId) {
+    return NextResponse.json({ error: "Não é possível eliminar a sua própria conta" }, { status: 400 });
+  }
+
   await prisma.user.delete({ where: { id } });
   return new NextResponse(null, { status: 204 });
 }

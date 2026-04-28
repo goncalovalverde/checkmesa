@@ -48,7 +48,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: 8 * 60 * 60 }, // 8-hour shift expiry
   callbacks: {
     jwt({ token, user }) {
       if (user) token.role = (user as { role: string }).role;

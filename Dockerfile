@@ -16,8 +16,6 @@ RUN npm ci
 
 COPY . .
 
-# Generate Prisma client using the schema's DATABASE_URL (file path at build time)
-ENV DATABASE_URL="file:./prisma/dev.db"
 RUN npx prisma generate
 
 RUN npm run build

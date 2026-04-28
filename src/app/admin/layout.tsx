@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { LogoutButton } from "@/components/admin/LogoutButton";
 
 const NAV_LINKS = [
   { href: "/admin/users",     label: "Utilizadores", emoji: "👤" },
@@ -27,6 +28,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </Link>
           ))}
         </nav>
+        <LogoutButton userName={session.user.name} />
       </aside>
       <div className="admin-content">{children}</div>
     </div>

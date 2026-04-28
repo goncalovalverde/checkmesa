@@ -61,7 +61,16 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Write secrets to a temp file so they are never exposed in ps aux
+          # Fail immediately if the secret wasn't injected — avoids a running
+          # container that silently rejects all auth requests.
+          if [ -z "$NEXTAUTH_SECRET" ]; then
+            echo "✗ NEXTAUTH_SECRET is empty — add it to GitHub Secrets (Settings → Secrets → Actions)"
+            exit 1
+          fi
+
+          # Write secrets to a temp file so they are never exposed in ps aux.
+          # Trap ensures cleanup even if a later command fails.
+          trap 'rm -f /tmp/checkmesa.env' EXIT
           printf 'NEXTAUTH_SECRET=%s\nNEXTAUTH_URL=%s\n' \
             "$NEXTAUTH_SECRET" \
             "https://checkmesa.instavel.org" > /tmp/checkmesa.env
@@ -83,8 +92,6 @@ jobs:
             -e DATABASE_URL="file:/data/prod.db" \
             --env-file /tmp/checkmesa.env \
             checkmesa:latest
-
-          rm -f /tmp/checkmesa.env
 
       - name: Health check
         run: |

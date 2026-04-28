@@ -11,6 +11,10 @@ RUN npm ci --omit=dev
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# OpenSSL must be present so 'prisma generate' detects the correct engine target
+# (linux-musl-arm64-openssl-3.0.x) for the native build environment.
+RUN apk add --no-cache openssl
+
 COPY package*.json ./
 RUN npm ci
 
@@ -26,6 +30,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+# Bypass Prisma's OpenSSL auto-detection, which defaults to 1.1.x when it fails.
+# Alpine ARM64 ships OpenSSL 3; point directly at the matching engine binary.
+ENV PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/.prisma/client/libquery_engine-linux-musl-arm64-openssl-3.0.x.so.node
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs

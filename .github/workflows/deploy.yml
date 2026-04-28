@@ -80,7 +80,7 @@ jobs:
             --restart unless-stopped \
             -p 3000:3000 \
             -v checkmesa-db:/data \
-            -e DATABASE_URL="file:/data/dev.db" \
+            -e DATABASE_URL="file:/data/prod.db" \
             --env-file /tmp/checkmesa.env \
             checkmesa:latest
 

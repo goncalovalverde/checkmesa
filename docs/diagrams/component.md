@@ -36,7 +36,7 @@ graph TD
     end
 
     subgraph Data["Data Layer"]
-        SQLite[("SQLite\nprisma/dev.db")]
+        SQLite[("SQLite\nprisma/prod.db")]
     end
 
     Browser -->|HTTP / fetch| Middleware

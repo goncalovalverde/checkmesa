@@ -36,7 +36,7 @@ Adoptar **Next.js 14 App Router + TypeScript + Prisma + SQLite + NextAuth.js + T
 - Single binary deployment via Docker — sem dependências externas
 - Prisma gera tipos TypeScript do schema → type-safety end-to-end
 - Next.js App Router unifica API routes e UI no mesmo projecto
-- SQLite persiste num ficheiro → backup trivial (copiar `dev.db`)
+- SQLite persiste num ficheiro → backup trivial (copiar `prod.db`)
 - Tailwind permite UI touch-friendly com utilitários de tamanho explícito
 
 **Negativas / Riscos:**
@@ -49,4 +49,4 @@ Adoptar **Next.js 14 App Router + TypeScript + Prisma + SQLite + NextAuth.js + T
 - `src/lib/prisma.ts` — singleton do PrismaClient para evitar múltiplas conexões em dev (hot reload)
 - `src/lib/vat.ts` — função pura `calculateVat(finalPrice, type)` testável de forma isolada
 - `middleware.ts` — protege `/admin` (role=ADMIN) e `/sala` (autenticado)
-- Volume Docker mapeado para `./prisma/dev.db` para persistência entre restarts
+- Volume Docker mapeado para `/data/prod.db` para persistência entre restarts

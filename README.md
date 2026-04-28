@@ -96,7 +96,7 @@ docker compose up --build
 ```
 
 A aplicação fica disponível em `http://localhost:3000`.  
-O ficheiro SQLite é persistido em volume Docker: `./prisma/dev.db`.
+O ficheiro SQLite é persistido em volume Docker: `checkmesa-db:/data/prod.db`.
 
 ## Deployment (Orange Pi)
 

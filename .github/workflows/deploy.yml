@@ -86,11 +86,15 @@ jobs:
               checkmesa:latest
 
             echo "── [4/4] Health check ───────────────────────────────────"
-            sleep 8
-            if docker ps --filter "name=checkmesa" --filter "status=running" | grep -q checkmesa; then
-              echo "✓ Container is running"
-            else
-              echo "✗ Container failed to start"
-              docker logs --tail 50 checkmesa || true
-              exit 1
-            fi
+            for i in 1 2 3 4 5; do
+              sleep 5
+              STATUS=$(curl -sf http://localhost:3000/api/health | grep -o '"status":"ok"' || true)
+              if [ -n "$STATUS" ]; then
+                echo "✓ Health check passed (attempt $i)"
+                exit 0
+              fi
+              echo "  attempt $i — not ready yet"
+            done
+            echo "✗ Health check failed after 25s"
+            docker logs --tail 50 checkmesa || true
+            exit 1

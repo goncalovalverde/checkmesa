@@ -58,13 +58,17 @@ jobs:
       - name: Swap container
         env:
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
         run: |
           set -euo pipefail
 
-          # Fail immediately if the secret wasn't injected — avoids a running
-          # container that silently rejects all auth requests.
+          # Fail immediately if required secrets weren't injected.
           if [ -z "$NEXTAUTH_SECRET" ]; then
             echo "✗ NEXTAUTH_SECRET is empty — add it to GitHub Secrets (Settings → Secrets → Actions)"
+            exit 1
+          fi
+          if [ -z "$NEXTAUTH_URL" ]; then
+            echo "✗ NEXTAUTH_URL is empty — add it to GitHub Secrets (Settings → Secrets → Actions)"
             exit 1
           fi
 
@@ -73,7 +77,7 @@ jobs:
           trap 'rm -f /tmp/checkmesa.env' EXIT
           printf 'NEXTAUTH_SECRET=%s\nNEXTAUTH_URL=%s\n' \
             "$NEXTAUTH_SECRET" \
-            "https://checkmesa.instavel.org" > /tmp/checkmesa.env
+            "$NEXTAUTH_URL" > /tmp/checkmesa.env
 
           # Ensure the named volume's /data directory is owned by uid/gid 1001
           # (nextjs:nodejs). This is a no-op on a fresh volume but fixes ownership

@@ -118,9 +118,10 @@ sudo usermod -aG docker $USER
 
 ### Secrets necessários no GitHub (Settings → Secrets → Actions)
 
-| Secret | Descrição |
-|---|---|
-| `NEXTAUTH_SECRET` | Segredo aleatório de 32+ chars para assinatura de sessões |
+| Secret | Exemplo | Descrição |
+|---|---|---|
+| `NEXTAUTH_SECRET` | *(gerado abaixo)* | Segredo aleatório de 32+ chars para assinatura de sessões |
+| `NEXTAUTH_URL` | `https://checkmesa.instavel.org` | URL pública da aplicação — usada pelo NextAuth para callbacks OAuth e CSRF |
 
 ```bash
 # Gerar um segredo seguro:

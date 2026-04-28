@@ -127,6 +127,27 @@ sudo usermod -aG docker $USER
 openssl rand -base64 32
 ```
 
+### Monitorização do container
+
+O `Dockerfile` inclui uma instrução `HEALTHCHECK` nativa que sonda `/api/health` de 30 em 30 segundos. O estado é visível directamente em `docker ps`:
+
+```
+CONTAINER ID   IMAGE        STATUS                    PORTS
+a1b2c3d4e5f6   checkmesa    Up 2 minutes (healthy)    0.0.0.0:3000->3000/tcp
+```
+
+| Estado | Significado |
+|---|---|
+| `(health: starting)` | Dentro do período de graça inicial (30 s) — migrações ainda em curso |
+| `(healthy)` | `/api/health` respondeu `{"status":"ok"}` nas últimas 3 sondagens |
+| `(unhealthy)` | 3 falhas consecutivas — container deve ser reiniciado |
+
+Para inspecionar o histórico de sondagens:
+
+```bash
+docker inspect --format='{{json .State.Health}}' checkmesa | jq
+```
+
 > Ver [ADR-0005](docs/adr/0005-deploy-orange-pi-ssh.md) para a decisão arquitectural completa.
 
 ## Diagramas UML

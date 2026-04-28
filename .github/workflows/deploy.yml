@@ -40,6 +40,12 @@ jobs:
       - name: Run test suite
         run: npm test -- --passWithNoTests
 
+      - name: Audit production dependencies
+        # --audit-level=high fails the job on high/critical vulnerabilities only.
+        # --omit=dev excludes test toolchain packages (jest, jsdom, etc.) that
+        # never reach the production Docker image.
+        run: npm audit --omit=dev --audit-level=high
+
   # ── Job 2: Deploy (self-hosted Orange Pi) ───────────────────────────────────
   deploy:
     name: Deploy on Orange Pi

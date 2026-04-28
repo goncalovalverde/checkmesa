@@ -126,3 +126,4 @@ jobs:
           docker exec \
             -e SEED_ADMIN_PASSWORD="$SEED_ADMIN_PASSWORD" \
             checkmesa node /app/docker-seed.js
+          docker exec checkmesa rm /app/docker-seed.js

@@ -77,7 +77,7 @@ const sessionCallback = authOptions.callbacks!.session! as (args: any) => any;
 
 describe("auth — jwt callback", () => {
   it("adds role to token when user is present", () => {
-    const token: JWT = { sub: "user-1" };
+    const token = { sub: "user-1" } as JWT;
     const user = { id: "user-1", name: "Alice", email: "a@b.com", role: "ADMIN" };
     const result = jwtCallback({ token, user });
     expect(result.role).toBe("ADMIN");
@@ -94,7 +94,7 @@ describe("auth — session callback", () => {
   it("maps token sub and role onto session.user", () => {
     const token: JWT = { sub: "user-1", role: "ADMIN" };
     const session: Session = {
-      user: { name: "Alice", email: "a@b.com" },
+      user: { name: "Alice", email: "a@b.com", id: "", role: "" },
       expires: "2099-01-01",
     };
     const result = sessionCallback({ session, token });

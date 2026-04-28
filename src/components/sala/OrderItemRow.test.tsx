@@ -12,7 +12,6 @@ const BASE_ITEM = {
   product: {
     id: "prod-1",
     name: "Bife com Fritas",
-    type: "DISH",
     category: "prato",
     finalPrice: 5.5,
     basePrice: 4.87,

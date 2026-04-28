@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ExportQuerySchema } from "@/lib/schemas";
+import { requireRole } from "@/lib/auth-guard";
 
 function escapeCell(value: string | number | null | undefined): string {
   const str = String(value ?? "");
@@ -28,10 +27,8 @@ function durationMin(ms: number | null): string {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as { role?: string }).role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const auth = await requireRole("ADMIN");
+  if (!auth.ok) return auth.response;
 
   const { searchParams } = req.nextUrl;
   const queryParsed = ExportQuerySchema.safeParse({

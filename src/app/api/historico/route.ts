@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireRole } from "@/lib/auth-guard";
 
 const PAGE_SIZE = 25;
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as { role?: string }).role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const auth = await requireRole("ADMIN");
+  if (!auth.ok) return auth.response;
 
   const { searchParams } = req.nextUrl;
   const from = searchParams.get("from");
@@ -35,7 +32,7 @@ export async function GET(req: NextRequest) {
         table: { select: { name: true } },
         user: { select: { name: true } },
         orderItems: {
-          include: { product: { select: { name: true, type: true } } },
+          include: { product: { select: { name: true, category: { select: { name: true } } } } },
           orderBy: { addedAt: "asc" },
         },
       },
@@ -77,7 +74,7 @@ export async function GET(req: NextRequest) {
       items: s.orderItems.map((i) => ({
         id: i.id,
         productName: i.product.name,
-        productType: i.product.type,
+        productCategory: i.product.category.name,
         quantity: i.quantity,
         unitPrice: i.unitPrice,
         subtotal: i.quantity * i.unitPrice,

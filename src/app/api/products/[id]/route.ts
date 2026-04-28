@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateVat } from "@/lib/vat";
 import { PatchProductSchema, validationError } from "@/lib/schemas";
+import { requireRole } from "@/lib/auth-guard";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   const { id } = await params;
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as { role?: string }).role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const auth = await requireRole("ADMIN");
+  if (!auth.ok) return auth.response;
 
   const parsed = PatchProductSchema.safeParse(await req.json());
   if (!parsed.success) return validationError(parsed.error);
@@ -51,10 +48,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_: NextRequest, { params }: Params) {
   const { id } = await params;
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as { role?: string }).role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const auth = await requireRole("ADMIN");
+  if (!auth.ok) return auth.response;
 
   await prisma.product.update({ where: { id }, data: { active: false } });
   return new NextResponse(null, { status: 204 });

@@ -1,12 +1,12 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 interface HistoryItem {
   id: string;
   productName: string;
-  productType: "DRINK" | "DISH";
+  productCategory: string;
   quantity: number;
   unitPrice: number;
   subtotal: number;
@@ -294,9 +294,8 @@ export default function HistoricoPage() {
                     {sessions.map((s) => {
                       const isOpen = expanded.has(s.id);
                       return (
-                        <>
+                        <React.Fragment key={s.id}>
                           <tr
-                            key={s.id}
                             onClick={() => toggleExpand(s.id)}
                             style={{ cursor: "pointer", background: isOpen ? "var(--bg-warm)" : undefined }}
                           >
@@ -339,10 +338,10 @@ export default function HistoricoPage() {
                                           <td style={{ padding: "var(--s1) var(--s2)" }}>{item.productName}</td>
                                           <td style={{ padding: "var(--s1) var(--s2)" }}>
                                             <span className="badge" style={{
-                                              background: item.productType === "DRINK" ? "#DBEAFE" : "#FEF3C7",
-                                              color: item.productType === "DRINK" ? "#1D4ED8" : "#92400E",
+                                              background: "var(--bg-warm)",
+                                              color: "var(--text-secondary)",
                                             }}>
-                                              {item.productType === "DRINK" ? "Bebida" : "Prato"}
+                                              {item.productCategory}
                                             </span>
                                           </td>
                                           <td style={{ textAlign: "right", padding: "var(--s1) var(--s2)" }}>×{item.quantity}</td>
@@ -375,7 +374,7 @@ export default function HistoricoPage() {
                               </td>
                             </tr>
                           )}
-                        </>
+                        </React.Fragment>
                       );
                     })}
                   </tbody>

@@ -5,7 +5,7 @@ import { OrderItemRow } from "@/components/sala/OrderItemRow";
 import { ProductGrid } from "@/components/sala/ProductGrid";
 
 interface Product {
-  id: string; name: string; type: "DRINK" | "DISH"; category: string;
+  id: string; name: string; category: string;
   finalPrice: number; basePrice: number; vatAmount: number; vatRate: number; active: boolean;
 }
 interface OrderItem {

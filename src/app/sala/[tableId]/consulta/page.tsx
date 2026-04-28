@@ -5,7 +5,7 @@ import { IvaBreakdown } from "@/components/sala/consulta/IvaBreakdown";
 import { SplitByPerson } from "@/components/sala/consulta/SplitByPerson";
 
 interface Product {
-  id: string; name: string; type: "DRINK" | "DISH"; category: string;
+  id: string; name: string; category: string;
   finalPrice: number; basePrice: number; vatAmount: number; vatRate: number; active: boolean;
 }
 interface OrderItem {

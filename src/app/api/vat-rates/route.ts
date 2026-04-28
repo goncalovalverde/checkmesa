@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CreateVatRateSchema, validationError } from "@/lib/schemas";
+import { requireAuth, requireRole } from "@/lib/auth-guard";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requireAuth();
+  if (!auth.ok) return auth.response;
 
   const vatRates = await prisma.vatRate.findMany({ orderBy: { rate: "asc" } });
   return NextResponse.json(vatRates);
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as { role?: string }).role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const auth = await requireRole("ADMIN");
+  if (!auth.ok) return auth.response;
 
   const parsed = CreateVatRateSchema.safeParse(await req.json());
   if (!parsed.success) return validationError(parsed.error);

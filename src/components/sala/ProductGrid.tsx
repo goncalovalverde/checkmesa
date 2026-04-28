@@ -11,7 +11,6 @@ const CATEGORIES = [
 interface Product {
   id: string;
   name: string;
-  type: "DRINK" | "DISH";
   category: string;
   finalPrice: number;
   basePrice: number;
@@ -27,11 +26,14 @@ interface Props {
 
 function matchCategory(p: Product, tab: string): boolean {
   const cat = p.category?.toLowerCase() ?? "";
-  if (tab === "bebidas")    return p.type === "DRINK" || cat.includes("bebida");
-  if (tab === "pratos")     return p.type === "DISH" && (cat.includes("prato") || cat.includes("principal"));
-  if (tab === "entradas")   return p.type === "DISH" && cat.includes("entrada");
-  if (tab === "sobremesas") return cat.includes("sobremesa");
-  return true;
+  const keywords: Record<string, string> = {
+    bebidas: "bebida",
+    pratos: "prato",
+    entradas: "entrada",
+    sobremesas: "sobremesa",
+  };
+  const keyword = keywords[tab];
+  return keyword ? cat.includes(keyword) : true;
 }
 
 export function ProductGrid({ products, onAddProduct }: Props) {

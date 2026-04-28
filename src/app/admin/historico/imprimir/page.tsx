@@ -51,7 +51,7 @@ export default async function ImprimirPage({
       table: { select: { name: true } },
       user: { select: { name: true } },
       orderItems: {
-        include: { product: { select: { name: true, type: true } } },
+        include: { product: { select: { name: true, category: { select: { name: true } } } } },
         orderBy: { addedAt: "asc" },
       },
     },
@@ -201,7 +201,7 @@ export default async function ImprimirPage({
                           <thead>
                             <tr>
                               <th style={{ textAlign: "left" }}>Produto</th>
-                              <th style={{ textAlign: "left" }}>Tipo</th>
+                              <th style={{ textAlign: "left" }}>Categoria</th>
                               <th>Qtd</th>
                               <th>Preço Unit.</th>
                               <th>Subtotal</th>
@@ -212,8 +212,8 @@ export default async function ImprimirPage({
                               <tr key={item.id}>
                                 <td>{item.product.name}</td>
                                 <td>
-                                  <span className={`badge ${item.product.type === "DRINK" ? "badge-drink" : "badge-dish"}`}>
-                                    {item.product.type === "DRINK" ? "Bebida" : "Prato"}
+                                  <span className="badge">
+                                    {item.product.category.name}
                                   </span>
                                 </td>
                                 <td>×{item.quantity}</td>

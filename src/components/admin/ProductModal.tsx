@@ -5,7 +5,6 @@ import { ModalShell } from "@/components/ModalShell";
 interface Product {
   id: string;
   name: string;
-  type: "DRINK" | "DISH";
   category: string;
   categoryId: string;
   finalPrice: number;
@@ -18,6 +17,7 @@ interface Product {
 interface CategoryOption {
   id: string;
   name: string;
+  vatRate: { id: string; label: string; rate: number };
 }
 
 interface Props {
@@ -27,12 +27,9 @@ interface Props {
   onSaved: () => void;
 }
 
-const VAT_RATES: Record<"DRINK" | "DISH", number> = { DISH: 0.13, DRINK: 0.23 };
-
 export function ProductModal({ product, categories, onClose, onSaved }: Props) {
   const isEdit = !!product;
   const [name, setName] = useState(product?.name ?? "");
-  const [type, setType] = useState<"DRINK" | "DISH">(product?.type ?? "DISH");
   const [categoryId, setCategoryId] = useState(product?.categoryId ?? "");
   const [finalPrice, setFinalPrice] = useState(String(product?.finalPrice ?? ""));
   const [loading, setLoading] = useState(false);
@@ -40,15 +37,15 @@ export function ProductModal({ product, categories, onClose, onSaved }: Props) {
 
   useEffect(() => {
     setName(product?.name ?? "");
-    setType(product?.type ?? "DISH");
     setCategoryId(product?.categoryId ?? "");
     setFinalPrice(String(product?.finalPrice ?? ""));
     setError("");
   }, [product]);
 
-  const vatRate = VAT_RATES[type];
+  const selectedCategory = categories.find((c) => c.id === categoryId);
+  const vatRate = selectedCategory?.vatRate?.rate ?? 0;
   const fp = parseFloat(finalPrice) || 0;
-  const basePrice = fp / (1 + vatRate);
+  const basePrice = vatRate > 0 ? fp / (1 + vatRate) : fp;
   const vatAmount = fp - basePrice;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -61,7 +58,7 @@ export function ProductModal({ product, categories, onClose, onSaved }: Props) {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, type, categoryId, finalPrice: fp }),
+        body: JSON.stringify({ name, categoryId, finalPrice: fp }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -83,29 +80,22 @@ export function ProductModal({ product, categories, onClose, onSaved }: Props) {
           <input value={name} onChange={(e) => setName(e.target.value)} required className="input" />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--s3)" }}>
-          <div className="field">
-            <label className="input-label" style={{ textTransform: "uppercase", letterSpacing: ".05em" }}>Tipo</label>
-            <select value={type} onChange={(e) => setType(e.target.value as "DRINK" | "DISH")} className="input" style={{ cursor: "pointer" }}>
-              <option value="DISH">🍽️ Prato (IVA 13%)</option>
-              <option value="DRINK">🥤 Bebida (IVA 23%)</option>
-            </select>
-          </div>
-          <div className="field">
-            <label className="input-label" style={{ textTransform: "uppercase", letterSpacing: ".05em" }}>Categoria</label>
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              required
-              className="input"
-              style={{ cursor: "pointer" }}
-            >
-              <option value="">Selecionar categoria…</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
+        <div className="field">
+          <label className="input-label" style={{ textTransform: "uppercase", letterSpacing: ".05em" }}>Categoria</label>
+          <select
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            required
+            className="input"
+            style={{ cursor: "pointer" }}
+          >
+            <option value="">Selecionar categoria…</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name} — {cat.vatRate?.label ?? "IVA?"}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="field">
@@ -123,7 +113,7 @@ export function ProductModal({ product, categories, onClose, onSaved }: Props) {
           />
         </div>
 
-        {fp > 0 && (
+        {fp > 0 && selectedCategory && (
           <div style={{
             background: "var(--bg-warm)",
             borderRadius: "var(--r-md)",

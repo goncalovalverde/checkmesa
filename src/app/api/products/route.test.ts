@@ -3,8 +3,10 @@
  */
 import { NextRequest } from "next/server";
 
-jest.mock("next-auth", () => ({ getServerSession: jest.fn() }));
-jest.mock("@/lib/auth", () => ({ authOptions: {} }));
+jest.mock("@/lib/auth-guard", () => ({
+  requireAuth: jest.fn(),
+  requireRole: jest.fn(),
+}));
 jest.mock("@/lib/prisma", () => ({
   prisma: {
     product: {
@@ -18,7 +20,7 @@ jest.mock("@/lib/prisma", () => ({
 }));
 
 import { GET, POST } from "./route";
-import { getServerSession } from "next-auth";
+import { requireAuth, requireRole } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
 
 const mockSession = { user: { id: "user-1", role: "ADMIN" } };
@@ -37,14 +39,14 @@ describe("GET /api/products", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 401 when not authenticated", async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(null);
+    (requireAuth as jest.Mock).mockResolvedValue({ ok: false, response: Response.json({ error: "Unauthorized" }, { status: 401 }) });
     const res = await GET();
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: "Unauthorized" });
   });
 
   it("returns 200 with flattened products list", async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockSession);
+    (requireAuth as jest.Mock).mockResolvedValue({ ok: true, session: mockSession });
     const dbProducts = [
       {
         id: "p1", name: "Bife", categoryId: "cat-1",
@@ -66,27 +68,27 @@ describe("POST /api/products", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("returns 403 when user is not ADMIN", async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockStaffSession);
+    (requireRole as jest.Mock).mockResolvedValue({ ok: false, response: Response.json({ error: "Forbidden" }, { status: 403 }) });
     const res = await POST(postReq({ name: "X", categoryId: "c1", finalPrice: 10 }));
     expect(res.status).toBe(403);
     expect(await res.json()).toEqual({ error: "Forbidden" });
   });
 
   it("returns 422 when required fields are missing", async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockAdminSession);
+    (requireRole as jest.Mock).mockResolvedValue({ ok: true, session: mockAdminSession });
     const res = await POST(postReq({ name: "Bife" }));
     expect(res.status).toBe(422);
   });
 
   it("returns 404 when category not found", async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockAdminSession);
+    (requireRole as jest.Mock).mockResolvedValue({ ok: true, session: mockAdminSession });
     (prisma.category.findUnique as jest.Mock).mockResolvedValue(null);
     const res = await POST(postReq({ name: "Mousse", categoryId: "cat-missing", finalPrice: 4 }));
     expect(res.status).toBe(404);
   });
 
   it("returns 201 with created product and VAT derived from category", async () => {
-    (getServerSession as jest.Mock).mockResolvedValue(mockAdminSession);
+    (requireRole as jest.Mock).mockResolvedValue({ ok: true, session: mockAdminSession });
     (prisma.category.findUnique as jest.Mock).mockResolvedValue({
       id: "cat-2",
       vatRate: { id: "vr-intermedio", label: "Intermédio (13%)", rate: 0.13 },

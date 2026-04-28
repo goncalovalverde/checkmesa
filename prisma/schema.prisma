@@ -32,8 +32,6 @@ model Table {
 model Product {
   id         String   @id @default(cuid())
   name       String
-  /// DRINK | DISH
-  type       String
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
   finalPrice Float
@@ -61,9 +59,18 @@ model TableSession {
 }
 
 model Category {
-  id       String    @id @default(cuid())
-  name     String    @unique
-  products Product[]
+  id         String    @id @default(cuid())
+  name       String    @unique
+  vatRateId  String
+  vatRate    VatRate   @relation(fields: [vatRateId], references: [id])
+  products   Product[]
+}
+
+model VatRate {
+  id         String     @id @default(cuid())
+  label      String     @unique
+  rate       Float
+  categories Category[]
 }
 
 model OrderItem {

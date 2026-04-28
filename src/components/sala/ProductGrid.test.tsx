@@ -4,10 +4,10 @@ import userEvent from "@testing-library/user-event";
 import { ProductGrid } from "./ProductGrid";
 
 const PRODUCTS = [
-  { id: "1", name: "Água",        type: "DRINK" as const, category: "bebida",    finalPrice: 1.0,  basePrice: 0.81, vatAmount: 0.19, vatRate: 0.23, active: true },
-  { id: "2", name: "Bife",        type: "DISH"  as const, category: "prato",     finalPrice: 12.0, basePrice: 10.62, vatAmount: 1.38, vatRate: 0.13, active: true },
-  { id: "3", name: "Mousse",      type: "DISH"  as const, category: "sobremesa", finalPrice: 4.0,  basePrice: 3.54, vatAmount: 0.46, vatRate: 0.13, active: true },
-  { id: "4", name: "Caldo Verde", type: "DISH"  as const, category: "entrada",   finalPrice: 3.5,  basePrice: 3.1,  vatAmount: 0.40, vatRate: 0.13, active: true },
+  { id: "1", name: "Água",        category: "bebida",    finalPrice: 1.0,  basePrice: 0.81, vatAmount: 0.19, vatRate: 0.23, active: true },
+  { id: "2", name: "Bife",        category: "prato",     finalPrice: 12.0, basePrice: 10.62, vatAmount: 1.38, vatRate: 0.13, active: true },
+  { id: "3", name: "Mousse",      category: "sobremesa", finalPrice: 4.0,  basePrice: 3.54, vatAmount: 0.46, vatRate: 0.13, active: true },
+  { id: "4", name: "Caldo Verde", category: "entrada",   finalPrice: 3.5,  basePrice: 3.1,  vatAmount: 0.40, vatRate: 0.13, active: true },
 ];
 
 describe("ProductGrid", () => {

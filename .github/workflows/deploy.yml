@@ -41,16 +41,45 @@ jobs:
         run: npm test -- --passWithNoTests
 
       - name: Audit production dependencies
-        # --audit-level=high fails the job on high/critical vulnerabilities only.
-        # --omit=dev excludes test toolchain packages (jest, jsdom, etc.) that
-        # never reach the production Docker image.
-        # pipefail preserves npm audit's exit code through the tee pipe.
+        # Fails the job only on high/critical severity.
+        # Formats the audit report as a Markdown table in the Actions job summary.
         run: |
-          set -o pipefail
-          echo "## 🔒 npm audit (production)" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          npm audit --omit=dev --audit-level=high 2>&1 | tee -a $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          set -euo pipefail
+          AUDIT_FILE=$(mktemp)
+          trap 'rm -f "$AUDIT_FILE"' EXIT
+
+          # Capture JSON to file; suppress progress spinners on stderr.
+          # '|| true' prevents set -e from exiting on non-zero audit exit code —
+          # we compute the exit condition ourselves from the JSON metadata.
+          npm audit --omit=dev --json > "$AUDIT_FILE" 2>/dev/null || true
+
+          TOTAL=$(jq '.metadata.vulnerabilities.total    // 0' "$AUDIT_FILE")
+          HIGH=$(jq  '.metadata.vulnerabilities.high     // 0' "$AUDIT_FILE")
+          CRIT=$(jq  '.metadata.vulnerabilities.critical // 0' "$AUDIT_FILE")
+
+          {
+            echo "## 🔒 npm audit (production)"
+            echo ""
+            if [ "$TOTAL" -eq 0 ]; then
+              echo "✅ No vulnerabilities found."
+            else
+              jq -r '"**\(.metadata.vulnerabilities.total) vulnerabilities** — 🔴 critical: \(.metadata.vulnerabilities.critical) · 🟠 high: \(.metadata.vulnerabilities.high) · 🟡 moderate: \(.metadata.vulnerabilities.moderate) · 🔵 low: \(.metadata.vulnerabilities.low)"' "$AUDIT_FILE"
+              echo ""
+              echo "| Severity | Package | Title | Advisory |"
+              echo "|---|---|---|---|"
+              jq -r '
+                .vulnerabilities | to_entries[] | .value as $v |
+                ($v.via[] | select(type == "object")) |
+                "| \($v.severity) | `\($v.name)` | \(.title // "-") | [\(.url | split("/")[-1])](\(.url)) |"
+              ' "$AUDIT_FILE"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$((HIGH + CRIT))" -gt 0 ]; then
+            echo "✗ Found $HIGH high and $CRIT critical vulnerabilities — blocking deploy"
+            exit 1
+          fi
+          echo "✓ No high or critical vulnerabilities"
 
   # ── Job 2: Deploy (self-hosted Orange Pi) ───────────────────────────────────
   deploy:

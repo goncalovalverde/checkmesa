@@ -121,22 +121,9 @@ jobs:
             exit 0
           fi
 
-          # Idempotent: only creates the admin user if no users exist yet.
-          # Staff users are created by the admin through the application UI.
-          # Runs after health check so Prisma client is fully ready.
+          # Copy the seed script into the container and run it.
+          # The script is idempotent: skips if any user already exists (fresh-install only).
+          docker cp scripts/docker-seed.js checkmesa:/tmp/docker-seed.js
           docker exec \
             -e SEED_ADMIN_PASSWORD="$SEED_ADMIN_PASSWORD" \
-            checkmesa node -e "
-              const { PrismaClient } = require('@prisma/client');
-              const bcrypt = require('bcryptjs');
-              const prisma = new PrismaClient();
-              async function run() {
-                const count = await prisma.user.count();
-                if (count > 0) { console.log('✓ Users already exist — skipping seed'); return; }
-                const adminHash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD, 12);
-                await prisma.user.create({ data: { name: 'Administrador', email: 'admin@checkmesa.pt', password: adminHash, role: 'ADMIN' } });
-                console.log('✓ Seed concluído — admin criado');
-              }
-              run().catch(e => { console.error(e); process.exit(1); }).finally(() => prisma.\$disconnect());
-            "
-
+            checkmesa node /tmp/docker-seed.js

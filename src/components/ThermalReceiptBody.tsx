@@ -1,4 +1,5 @@
-// Pure presentational component — no data fetching, no server-only imports.
+"use client";
+// Client component — owns the print/close buttons (event handlers).
 // Renders the <body> content of a thermal 80mm POS receipt.
 
 export interface ReceiptItem {

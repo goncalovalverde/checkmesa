@@ -25,8 +25,7 @@ Adoptar a estratégia **Self-Hosted Runner no Orange Pi**:
 
 1. O Orange Pi corre um GitHub Actions runner com as labels `self-hosted, linux, arm64`.
 2. A cada push em `main`, o runner faz checkout do repositório, constrói a imagem Docker nativamente em ARM64, e reinicia o container.
-3. O `NEXTAUTH_SECRET` é armazenado como GitHub Secret e injectado no container via ficheiro `.env` temporário (evita exposição em `ps aux`).
-4. O `NEXTAUTH_URL` é um valor não-sensível hardcoded no workflow.
+3. Os secrets `NEXTAUTH_SECRET` e `NEXTAUTH_URL` são armazenados como GitHub Secrets e injectados no container via ficheiro `.env` temporário (evita exposição em `ps aux`). O deploy falha imediatamente se qualquer um estiver em falta.
 
 ---
 
@@ -44,9 +43,10 @@ Adoptar a estratégia **Self-Hosted Runner no Orange Pi**:
 
 **Positivas:**
 - Zero problemas de arquitectura — a imagem é construída nativamente em ARM64
-- Apenas 1 GitHub Secret necessário (`NEXTAUTH_SECRET`)
-- Pipeline simples e legível (< 80 linhas de YAML)
+- Apenas 2 GitHub Secrets necessários (`NEXTAUTH_SECRET`, `NEXTAUTH_URL`)
+- Pipeline simples e legível (< 100 linhas de YAML)
 - Sem dependência de ferramentas externas (sem `appleboy/ssh-action`)
+- Fail-fast: o deploy aborta com mensagem clara se um secret estiver em falta
 
 **Negativas / Riscos:**
 - O runner deve estar online para o deploy funcionar (aceitável — instalação local)
@@ -70,4 +70,5 @@ sudo usermod -aG docker $USER
 | Secret | Valor |
 |---|---|
 | `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
+| `NEXTAUTH_URL` | URL pública da aplicação, ex: `https://checkmesa.instavel.org` |
 
